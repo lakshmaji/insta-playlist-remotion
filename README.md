@@ -78,6 +78,53 @@ npm run version  # Update versions and generate changelog
 npm run release  # Build and publish
 ```
 
+## Deployment
+
+### Deploy to Vercel
+
+This project can be deployed to Vercel using GitHub Actions. The deployment workflow can be triggered manually.
+
+#### Prerequisites
+
+Before deploying, you need to set up the following secrets in your GitHub repository:
+
+1. **VERCEL_TOKEN**: Your Vercel authentication token
+   - Go to [Vercel Account Settings → Tokens](https://vercel.com/account/tokens)
+   - Create a new token and copy it
+
+2. **VERCEL_ORG_ID**: Your Vercel organization/team ID
+   - Run `vercel link` in your project directory locally
+   - Find the value in `.vercel/project.json` under `orgId`
+   - Or find it in your Vercel project settings
+
+3. **VERCEL_PROJECT_ID**: Your Vercel project ID
+   - Run `vercel link` in your project directory locally
+   - Find the value in `.vercel/project.json` under `projectId`
+   - Or find it in your Vercel project settings
+
+#### Add Secrets to GitHub
+
+1. Go to your GitHub repository
+2. Navigate to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Add each of the three secrets mentioned above
+
+#### Manual Deployment
+
+1. Go to the **Actions** tab in your GitHub repository
+2. Select the **Deploy to Vercel** workflow
+3. Click **Run workflow**
+4. Choose the deployment environment:
+   - **production**: Deploy to production
+   - **preview**: Deploy to preview environment
+5. Click **Run workflow** to start the deployment
+
+The workflow will:
+- Install dependencies
+- Build the application
+- Deploy to Vercel using the Vercel CLI
+- Provide deployment URL in the workflow logs
+
 ## Usage
 
 ### Adding Bookmarks
