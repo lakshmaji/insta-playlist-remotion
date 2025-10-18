@@ -121,19 +121,27 @@
 	}
 </script>
 
-<div class="app-container">
-	<header class="app-header">
-		<h1>📚 Bookmark Manager</h1>
-		<div class="header-actions">
-			<button onclick={openAddBookmark} class="btn-primary">+ Add Bookmark</button>
-			<button onclick={() => (showImportExportModal = true)} class="btn-secondary">
+<div class="min-h-screen flex flex-col">
+	<header class="bg-white border-b border-gray-200 px-8 py-6 flex justify-between items-center">
+		<h1 class="text-3xl font-bold text-gray-800">📚 Bookmark Manager</h1>
+		<div class="flex gap-4">
+			<button
+				onclick={openAddBookmark}
+				class="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold text-sm hover:bg-blue-600 transition-all"
+			>
+				+ Add Bookmark
+			</button>
+			<button
+				onclick={() => (showImportExportModal = true)}
+				class="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-all"
+			>
 				Import / Export
 			</button>
 		</div>
 	</header>
 
-	<div class="app-body">
-		<aside class="sidebar">
+	<div class="flex-1 grid lg:grid-cols-[300px_1fr] gap-6 p-6 max-w-screen-2xl mx-auto w-full">
+		<aside class="flex flex-col gap-6 h-fit lg:sticky lg:top-6">
 			<CategoryTree
 				{categories}
 				{selectedCategoryId}
@@ -143,24 +151,27 @@
 				onAdd={openAddCategory}
 			/>
 
-			<div class="sidebar-section">
+			<div class="max-h-96">
 				<TodoPanel {todos} {categories} />
 			</div>
 		</aside>
 
-		<main class="main-content">
-			<div class="filters">
-				<div class="search-box">
+		<main class="min-w-0">
+			<div class="flex gap-4 mb-6 flex-wrap">
+				<div class="flex-1 min-w-[200px]">
 					<input
 						type="search"
 						bind:value={searchQuery}
 						placeholder="Search bookmarks..."
-						class="search-input"
+						class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					/>
 				</div>
 
-				<div class="status-filter">
-					<select bind:value={statusFilter} class="status-select">
+				<div>
+					<select
+						bind:value={statusFilter}
+						class="px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
 						<option value="all">All Status</option>
 						<option value="unread">Unread</option>
 						<option value="reading">Reading</option>
@@ -171,12 +182,13 @@
 			</div>
 
 			{#if allTags().length > 0}
-				<div class="tag-filter">
-					<span class="filter-label">Filter by tags:</span>
+				<div class="flex flex-wrap gap-2 items-center mb-4 p-4 bg-white rounded-lg border border-gray-200">
+					<span class="font-semibold text-gray-600 text-sm">Filter by tags:</span>
 					{#each allTags() as tag}
 						<button
-							class="tag-button"
-							class:selected={selectedTags.includes(tag)}
+							class="px-4 py-2 rounded-full text-sm transition-all {selectedTags.includes(tag)
+								? 'bg-blue-500 text-white border-blue-500'
+								: 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'} border"
 							onclick={() => toggleTag(tag)}
 						>
 							{tag}
@@ -185,17 +197,22 @@
 				</div>
 			{/if}
 
-			<div class="bookmark-stats">
+			<div class="text-gray-600 mb-4 text-sm">
 				Showing {filteredBookmarks().length} of {bookmarks.length} bookmarks
 			</div>
 
-			<div class="bookmark-grid">
+			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 				{#if filteredBookmarks().length === 0}
-					<div class="empty-state">
-						<div class="empty-icon">🔖</div>
-						<h2>No bookmarks found</h2>
-						<p>Start by adding your first bookmark or adjust your filters.</p>
-						<button onclick={openAddBookmark} class="btn-primary">Add Bookmark</button>
+					<div class="col-span-full text-center py-16 px-8 bg-white rounded-lg border-2 border-dashed border-gray-200">
+						<div class="text-6xl mb-4">🔖</div>
+						<h2 class="text-xl font-semibold text-gray-800 mb-2">No bookmarks found</h2>
+						<p class="text-gray-600 mb-6">Start by adding your first bookmark or adjust your filters.</p>
+						<button
+							onclick={openAddBookmark}
+							class="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all inline-block"
+						>
+							Add Bookmark
+						</button>
 					</div>
 				{:else}
 					{#each filteredBookmarks() as bookmark (bookmark.id)}
@@ -234,217 +251,3 @@
 {#if showImportExportModal}
 	<ImportExportModal onClose={() => (showImportExportModal = false)} />
 {/if}
-
-<style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		background-color: #f9fafb;
-	}
-
-	.app-container {
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.app-header {
-		background: white;
-		border-bottom: 1px solid #e5e7eb;
-		padding: 1.5rem 2rem;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.app-header h1 {
-		margin: 0;
-		font-size: 1.75rem;
-		color: #1f2937;
-	}
-
-	.header-actions {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.btn-primary,
-	.btn-secondary {
-		padding: 0.75rem 1.5rem;
-		border: none;
-		border-radius: 6px;
-		cursor: pointer;
-		font-weight: 600;
-		font-size: 0.875rem;
-		transition: all 0.2s;
-	}
-
-	.btn-primary {
-		background-color: #3b82f6;
-		color: white;
-	}
-
-	.btn-primary:hover {
-		background-color: #2563eb;
-	}
-
-	.btn-secondary {
-		background-color: white;
-		color: #374151;
-		border: 1px solid #d1d5db;
-	}
-
-	.btn-secondary:hover {
-		background-color: #f3f4f6;
-	}
-
-	.app-body {
-		flex: 1;
-		display: grid;
-		grid-template-columns: 300px 1fr;
-		gap: 1.5rem;
-		padding: 1.5rem;
-		max-width: 1800px;
-		margin: 0 auto;
-		width: 100%;
-	}
-
-	.sidebar {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-		height: fit-content;
-		position: sticky;
-		top: 1.5rem;
-	}
-
-	.sidebar-section {
-		max-height: 400px;
-	}
-
-	.main-content {
-		min-width: 0;
-	}
-
-	.filters {
-		display: flex;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.search-box {
-		flex: 1;
-	}
-
-	.search-input {
-		width: 100%;
-		padding: 0.75rem 1rem;
-		border: 1px solid #d1d5db;
-		border-radius: 6px;
-		font-size: 1rem;
-	}
-
-	.search-input:focus {
-		outline: none;
-		border-color: #3b82f6;
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-	}
-
-	.status-select {
-		padding: 0.75rem 1rem;
-		border: 1px solid #d1d5db;
-		border-radius: 6px;
-		font-size: 1rem;
-		background: white;
-		cursor: pointer;
-	}
-
-	.tag-filter {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		align-items: center;
-		margin-bottom: 1rem;
-		padding: 1rem;
-		background: white;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-	}
-
-	.filter-label {
-		font-weight: 600;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.tag-button {
-		padding: 0.5rem 1rem;
-		background-color: #f3f4f6;
-		border: 1px solid #d1d5db;
-		border-radius: 20px;
-		cursor: pointer;
-		font-size: 0.875rem;
-		transition: all 0.2s;
-	}
-
-	.tag-button:hover {
-		background-color: #e5e7eb;
-	}
-
-	.tag-button.selected {
-		background-color: #3b82f6;
-		color: white;
-		border-color: #3b82f6;
-	}
-
-	.bookmark-stats {
-		color: #6b7280;
-		margin-bottom: 1rem;
-		font-size: 0.875rem;
-	}
-
-	.bookmark-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.empty-state {
-		grid-column: 1 / -1;
-		text-align: center;
-		padding: 4rem 2rem;
-		background: white;
-		border-radius: 8px;
-		border: 2px dashed #e5e7eb;
-	}
-
-	.empty-icon {
-		font-size: 4rem;
-		margin-bottom: 1rem;
-	}
-
-	.empty-state h2 {
-		margin: 0 0 0.5rem 0;
-		color: #1f2937;
-	}
-
-	.empty-state p {
-		color: #6b7280;
-		margin-bottom: 1.5rem;
-	}
-
-	@media (max-width: 1024px) {
-		.app-body {
-			grid-template-columns: 1fr;
-		}
-
-		.sidebar {
-			position: static;
-		}
-
-		.bookmark-grid {
-			grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-		}
-	}
-</style>

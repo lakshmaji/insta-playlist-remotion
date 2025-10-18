@@ -35,6 +35,20 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+### Linting
+
+Check code quality with ESLint:
+
+```bash
+npm run lint
+```
+
+Run Svelte type checking:
+
+```bash
+npm run check
+```
+
 ### Build
 
 ```bash
@@ -45,6 +59,23 @@ npm run build
 
 ```bash
 npm run preview
+```
+
+### Managing Changes
+
+This project uses [Changesets](https://github.com/changesets/changesets) for version management and changelog generation.
+
+To add a changeset when you make changes:
+
+```bash
+npm run changeset
+```
+
+Follow the prompts to describe your changes. When ready to version and release:
+
+```bash
+npm run version  # Update versions and generate changelog
+npm run release  # Build and publish
 ```
 
 ## Usage
@@ -117,6 +148,10 @@ src/
 - **Svelte 5**: Latest Svelte with runes for reactivity
 - **TypeScript**: Type safety
 - **Vite**: Build tool and dev server
+- **Tailwind CSS**: Utility-first CSS framework for styling and responsiveness
+- **ESLint**: Code linting and quality checks
+- **Changesets**: Version management and changelog generation
+- **GitHub Actions**: CI/CD pipeline for automated testing and builds
 - **Browser APIs**: localStorage, File API, DOMParser
 
 ## License
