@@ -10,6 +10,7 @@
 	import ImportExportModal from '$lib/components/ImportExportModal.svelte';
 	import TodoPanel from '$lib/components/TodoPanel.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
+	import TagsPanel from '$lib/components/TagsPanel.svelte';
 
 	let selectedCollectionId = $state<string | undefined>(undefined);
 	let selectedKindId = $state<string | undefined>(undefined);
@@ -158,7 +159,7 @@
 </script>
 
 <div class="flex flex-col h-screen">
-	<div class="flex-1 grid lg:grid-cols-[280px_1fr] gap-0 max-w-screen-2xl mx-auto w-full bg-neutral-950">
+	<div class="flex-1 grid lg:grid-cols-[240px_1fr_280px] gap-0 max-w-screen-2xl mx-auto w-full bg-neutral-950">
 		<aside class="h-full lg:sticky lg:top-0 bg-neutral-900">
 			<Sidebar
 				selectedSection={selectedSection}
@@ -271,10 +272,10 @@
 				</main>
 			{:else}
 				<!-- Bookmarks Section -->
-				<header class="bg-neutral-800 text-white p-4 flex justify-between items-center">
-					<h1 class="text-xl font-bold">
+				<header class="bg-neutral-900 text-white p-4 border-b border-neutral-800 flex justify-between items-center">
+					<h1 class="text-2xl font-bold">
 						{#if selectedSection === 'all'}
-							All Bookmarks
+							Inbox
 						{:else if selectedSection === 'favorites'}
 							Favorites
 						{:else if selectedSection === 'reading'}
@@ -284,58 +285,77 @@
 						{:else if selectedSection === 'archive'}
 							Archive
 						{:else}
-							Bookmarks
+							Inbox
 						{/if}
 					</h1>
 					
 					<div class="flex items-center gap-3">
-						<div class="flex items-center space-x-2">
-							<button class="p-2 rounded-md hover:bg-neutral-700 transition-all">
-								<span class="text-lg">🔍</span>
+						<div class="flex items-center gap-2 bg-neutral-800 rounded-lg p-1">
+							<button class="{viewMode === 'gallery' ? 'bg-neutral-700' : ''} p-2 rounded-md hover:bg-neutral-700 transition-all" 
+								onclick={() => viewMode = 'gallery'} title="Gallery view">
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+								</svg>
 							</button>
-							<button class="p-2 rounded-md hover:bg-neutral-700 transition-all">
-								<span class="text-lg">↓</span>
-							</button>
-							<button class="p-2 rounded-md hover:bg-neutral-700 transition-all">
-								<span class="text-lg">↑</span>
-							</button>
-							<button class="p-2 rounded-md hover:bg-neutral-700 transition-all">
-								<span class="text-lg">⊞</span>
+							<button class="{viewMode === 'list' ? 'bg-neutral-700' : ''} p-2 rounded-md hover:bg-neutral-700 transition-all" 
+								onclick={() => viewMode = 'list'} title="List view">
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+								</svg>
 							</button>
 						</div>
 						
-						<div>
-							<button onclick={openAddBookmark} class="px-4 py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all flex items-center gap-1">
-								<span>New</span>
-								<span class="text-xs">▼</span>
+						<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Today">
+							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+							</svg>
+						</button>
+						
+						<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="More options">
+							<span class="text-base">...</span>
+						</button>
+						
+						<div class="flex items-center gap-2">
+							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Search">
+								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+								</svg>
+							</button>
+							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Expand">
+								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"></path>
+								</svg>
+							</button>
+							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Filter">
+								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"></path>
+								</svg>
 							</button>
 						</div>
+						
+						<button onclick={openAddBookmark} class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 font-medium">
+							<span>New</span>
+							<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+							</svg>
+						</button>
 					</div>
 				</header>
 				
 				<main class="p-6 bg-neutral-950">
-					<!-- Filtering options -->
+					<!-- Search bar (if needed) -->
+					{#if searchQuery || selectedTags.length > 0}
 					<div class="flex gap-4 mb-6">
-						<div class="flex bg-neutral-800 rounded-md overflow-hidden">
-							<button class="px-4 py-2 {viewMode === 'gallery' ? 'bg-blue-500 text-white' : 'text-white/80 hover:bg-neutral-700'} transition-all"
-								onclick={() => viewMode = 'gallery'}>
-								Gallery
-							</button>
-							<button class="px-4 py-2 {viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-white/80 hover:bg-neutral-700'} transition-all"
-								onclick={() => viewMode = 'list'}>
-								List
-							</button>
-						</div>
-						
-						<div class="flex-1 min-w-[200px]">
+						<div class="flex-1">
 							<input
 								type="text"
-								placeholder="Search..."
-								class="w-full px-4 py-2 border border-neutral-700 rounded-md bg-neutral-800 text-white focus:outline-none focus:border-blue-500 transition-all"
+								placeholder="Search bookmarks..."
+								class="w-full px-4 py-2 border border-neutral-700 rounded-lg bg-neutral-800 text-white focus:outline-none focus:border-blue-500 transition-all"
 								bind:value={searchQuery}
 							/>
 						</div>
 					</div>
+					{/if}
 
 					<!-- Bookmarks grid -->
 					{#if filteredBookmarks().length === 0}
@@ -345,52 +365,37 @@
 							<p class="text-neutral-400 mb-6">Start by adding your first bookmark or adjust your filters.</p>
 							<button
 								onclick={openAddBookmark}
-								class="px-6 py-3 bg-blue-500 text-white rounded-md font-medium hover:bg-blue-600 transition-all"
+								class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all"
 							>
 								+ Add Bookmark
 							</button>
 						</div>
-					{:else if viewMode === 'gallery'}
-						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+					{:else}
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{#each filteredBookmarks() as bookmark (bookmark.id)}
 								<BookmarkCard
 									{bookmark}
+									kind={kinds.find(k => k.id === bookmark.kindId)}
 									onEdit={openEditBookmark}
 									onDelete={deleteBookmark}
 									onStatusChange={updateBookmarkStatus}
 								/>
 							{/each}
 						</div>
-					{:else}
-						<div class="bg-neutral-800 rounded-md overflow-hidden">
-							{#each filteredBookmarks() as bookmark (bookmark.id)}
-								<div class="border-b border-neutral-700 last:border-0 p-4 hover:bg-neutral-700 transition-all flex items-center gap-3">
-									<div class="w-8 h-8 flex-shrink-0 bg-neutral-700 rounded-md flex items-center justify-center overflow-hidden">
-										{#if bookmark.favicon}
-											<img src={bookmark.favicon} alt="" class="w-6 h-6 object-contain" />
-										{:else}
-											<span class="text-sm">🔖</span>
-										{/if}
-									</div>
-									<div class="flex-1 min-w-0">
-										<div class="font-medium text-white truncate">{bookmark.title}</div>
-										<div class="text-sm text-neutral-400 truncate">{bookmark.url}</div>
-									</div>
-									<div class="flex items-center gap-2">
-										<button class="p-2 text-neutral-400 hover:text-white transition-all" onclick={() => openEditBookmark(bookmark)}>
-											<span class="text-sm">✏️</span>
-										</button>
-										<button class="p-2 text-neutral-400 hover:text-white transition-all" onclick={() => deleteBookmark(bookmark.id)}>
-											<span class="text-sm">🗑️</span>
-										</button>
-									</div>
-								</div>
-							{/each}
-						</div>
 					{/if}
 				</main>
 			{/if}
 		</div>
+		
+		<!-- Right Sidebar - Tags Panel -->
+		<aside class="h-full lg:sticky lg:top-0 bg-neutral-900">
+			<TagsPanel
+				bookmarks={filteredBookmarks()}
+				allTags={allTags()}
+				selectedTags={selectedTags}
+				onSelectTag={toggleTag}
+			/>
+		</aside>
 	</div>
 </div>
 
