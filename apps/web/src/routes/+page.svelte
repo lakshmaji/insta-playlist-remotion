@@ -159,8 +159,8 @@
 </script>
 
 <div class="flex flex-col h-screen">
-	<div class="flex-1 grid lg:grid-cols-[240px_1fr_280px] gap-0 max-w-screen-2xl mx-auto w-full bg-neutral-950">
-		<aside class="h-full lg:sticky lg:top-0 bg-neutral-900">
+	<div class="flex-1 grid lg:grid-cols-[260px_1fr_300px] gap-0 w-full bg-[#111111]">
+		<aside class="h-full lg:sticky lg:top-0 bg-[#1a1a1a] border-r border-gray-800/50">
 			<Sidebar
 				selectedSection={selectedSection}
 				onSelectSection={(section) => {
@@ -181,6 +181,7 @@
 				kinds={kinds}
 				collections={collections}
 				tags={tags}
+				bookmarks={bookmarks}
 				selectedKindId={selectedKindId}
 				selectedCollectionId={selectedCollectionId}
 				selectedTagId={selectedTagId}
@@ -272,77 +273,106 @@
 				</main>
 			{:else}
 				<!-- Bookmarks Section -->
-				<header class="bg-neutral-900 text-white p-4 border-b border-neutral-800 flex justify-between items-center">
-					<h1 class="text-2xl font-bold">
-						{#if selectedSection === 'all'}
-							Inbox
-						{:else if selectedSection === 'favorites'}
-							Favorites
-						{:else if selectedSection === 'reading'}
-							Reading List
-						{:else if selectedSection === 'tags'}
-							Tags
-						{:else if selectedSection === 'archive'}
-							Archive
-						{:else}
-							Inbox
-						{/if}
-					</h1>
+				<header class="bg-[#1a1a1a] text-gray-300 px-6 py-3 border-b border-gray-800/50 flex justify-between items-center">
+					<div class="flex items-center gap-4">
+						<h1 class="text-lg font-medium">
+							{#if selectedSection === 'all'}
+								Inbox
+							{:else if selectedSection === 'favorites'}
+								Favorites
+							{:else if selectedSection === 'reading'}
+								Reading List
+							{:else if selectedSection === 'tags'}
+								Tags
+							{:else if selectedSection === 'archive'}
+								Archive
+							{:else}
+								Inbox
+							{/if}
+						</h1>
+						<span class="text-sm text-gray-500">•</span>
+						<span class="text-sm text-gray-500">{filteredBookmarks().length} items</span>
+					</div>
 					
-					<div class="flex items-center gap-3">
-						<div class="flex items-center gap-2 bg-neutral-800 rounded-lg p-1">
-							<button class="{viewMode === 'gallery' ? 'bg-neutral-700' : ''} p-2 rounded-md hover:bg-neutral-700 transition-all" 
-								onclick={() => viewMode = 'gallery'} title="Gallery view">
-								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+					<div class="flex items-center gap-2">
+						<!-- Settings Button Group -->
+						<div class="flex items-center gap-1 px-2 py-1">
+							<span class="text-xs text-gray-500 mr-2">Settings</span>
+							
+							<!-- View Mode -->
+							<div class="flex items-center bg-gray-800/50 rounded-md p-0.5">
+								<button class="{viewMode === 'gallery' ? 'bg-gray-700 text-blue-400' : 'text-gray-400'} p-1.5 rounded transition-all" 
+									onclick={() => viewMode = 'gallery'} title="Gallery view">
+									<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+										<path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+									</svg>
+								</button>
+								<button class="{viewMode === 'list' ? 'bg-gray-700 text-blue-400' : 'text-gray-400'} p-1.5 rounded transition-all" 
+									onclick={() => viewMode = 'list'} title="List view">
+									<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+									</svg>
+								</button>
+							</div>
+							
+							<!-- Sort -->
+							<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Sort">
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9M3 12h5M3 16h7"/>
 								</svg>
 							</button>
-							<button class="{viewMode === 'list' ? 'bg-neutral-700' : ''} p-2 rounded-md hover:bg-neutral-700 transition-all" 
-								onclick={() => viewMode = 'list'} title="List view">
-								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+							
+							<!-- Today -->
+							<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Today">
+								<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+								</svg>
+							</button>
+							
+							<!-- Week -->
+							<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Week">
+								<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
 								</svg>
 							</button>
 						</div>
 						
-						<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Today">
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+						<div class="h-4 w-px bg-gray-700"></div>
+						
+						<!-- Search -->
+						<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Search">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
 							</svg>
 						</button>
 						
-						<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="More options">
-							<span class="text-base">...</span>
+						<!-- Full screen -->
+						<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Full screen">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5h-4m4 0v-4"/>
+							</svg>
 						</button>
 						
-						<div class="flex items-center gap-2">
-							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Search">
-								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-								</svg>
-							</button>
-							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Expand">
-								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd"></path>
-								</svg>
-							</button>
-							<button class="p-2 rounded-md hover:bg-neutral-800 transition-all" title="Filter">
-								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"></path>
-								</svg>
-							</button>
-						</div>
+						<!-- Filter -->
+						<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Filter">
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+							</svg>
+						</button>
 						
-						<button onclick={openAddBookmark} class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 font-medium">
+						<div class="h-4 w-px bg-gray-700"></div>
+						
+						<!-- New Bookmark -->
+						<button onclick={openAddBookmark} class="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all flex items-center gap-1.5 text-sm font-medium">
 							<span>New</span>
 							<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+								<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
 							</svg>
 						</button>
 					</div>
 				</header>
 				
-				<main class="p-6 bg-neutral-950">
+				<main class="p-6 bg-[#111111]">
 					<!-- Search bar (if needed) -->
 					{#if searchQuery || selectedTags.length > 0}
 					<div class="flex gap-4 mb-6">
@@ -359,13 +389,15 @@
 
 					<!-- Bookmarks grid -->
 					{#if filteredBookmarks().length === 0}
-						<div class="text-center py-16 px-8 bg-neutral-800/50 rounded-xl border border-neutral-700">
-							<div class="text-5xl mb-4">🔖</div>
-							<h2 class="text-2xl font-bold mb-3 text-white">No bookmarks found</h2>
-							<p class="text-neutral-400 mb-6">Start by adding your first bookmark or adjust your filters.</p>
+						<div class="text-center py-16 px-8 bg-gray-800/20 rounded-xl border border-gray-800/50">
+							<svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
+							</svg>
+							<h2 class="text-xl font-semibold mb-2 text-gray-300">No bookmarks found</h2>
+							<p class="text-gray-500 text-sm mb-6">Start by adding your first bookmark or adjust your filters.</p>
 							<button
 								onclick={openAddBookmark}
-								class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all"
+								class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-all"
 							>
 								+ Add Bookmark
 							</button>
@@ -388,7 +420,7 @@
 		</div>
 		
 		<!-- Right Sidebar - Tags Panel -->
-		<aside class="h-full lg:sticky lg:top-0 bg-neutral-900">
+		<aside class="h-full lg:sticky lg:top-0 bg-[#1a1a1a] border-r border-gray-800/50">
 			<TagsPanel
 				bookmarks={filteredBookmarks()}
 				allTags={allTags()}

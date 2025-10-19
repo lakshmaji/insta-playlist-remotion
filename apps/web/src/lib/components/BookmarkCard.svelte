@@ -30,22 +30,32 @@
 	};
 </script>
 
-<div class="group bg-neutral-800/50 rounded-xl overflow-hidden transition-all hover:bg-neutral-800 hover:shadow-xl border border-neutral-700/50 hover:border-neutral-600">
+<div class="group bg-[#1a1a1a] rounded-lg overflow-hidden transition-all hover:bg-[#222] hover:shadow-xl border border-gray-800/50 hover:border-gray-700/50 cursor-pointer">
 	<!-- Thumbnail Section -->
-	<div class="relative w-full h-48 overflow-hidden bg-gradient-to-br from-neutral-800 via-neutral-900 to-black flex items-center justify-center">
+	<div class="relative w-full aspect-[16/10] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center">
 		{#if bookmark.thumbnail}
 			<img src={bookmark.thumbnail} alt={bookmark.title} class="w-full h-full object-cover" />
 		{:else}
-			<div class="flex items-center justify-center w-full h-full p-6">
-				<img src={getFaviconUrl(bookmark.url)} alt="" class="w-20 h-20 object-contain opacity-60" />
+			<div class="flex flex-col items-center justify-center w-full h-full p-6 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+				<img src={getFaviconUrl(bookmark.url)} alt="" class="w-12 h-12 object-contain mb-3" />
+				<span class="text-gray-500 text-xs truncate max-w-full px-2">{new URL(bookmark.url).hostname}</span>
 			</div>
 		{/if}
 		
-		<!-- Edit/Delete buttons overlay -->
-		<div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+		<!-- Overlay actions on hover -->
+		<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
 			<button
-				class="p-2 rounded-lg bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors text-white"
-				onclick={() => onEdit(bookmark)}
+				class="p-2.5 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition-colors text-white"
+				onclick={(e) => { e.stopPropagation(); window.open(bookmark.url, '_blank'); }}
+				title="Open"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+				</svg>
+			</button>
+			<button
+				class="p-2.5 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition-colors text-white"
+				onclick={(e) => { e.stopPropagation(); onEdit(bookmark); }}
 				title="Edit"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,8 +63,8 @@
 				</svg>
 			</button>
 			<button
-				class="p-2 rounded-lg bg-black/60 backdrop-blur-sm hover:bg-red-600/80 transition-colors text-white"
-				onclick={() => onDelete(bookmark.id)}
+				class="p-2.5 rounded-full bg-white/10 backdrop-blur hover:bg-red-600/50 transition-colors text-white"
+				onclick={(e) => { e.stopPropagation(); onDelete(bookmark.id); }}
 				title="Delete"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,29 +72,42 @@
 				</svg>
 			</button>
 		</div>
-	</div>
-
-	<!-- Content Section -->
-	<div class="p-4">
-		<!-- Title -->
-		<div class="mb-2">
-			<a href={bookmark.url} target="_blank" rel="noopener noreferrer" class="font-semibold text-white text-base hover:text-blue-400 transition-colors line-clamp-2 block">
-				{bookmark.title}
-			</a>
-		</div>
-
-		<!-- Category Badge -->
+		
+		<!-- Category Badge in corner -->
 		{#if kind}
-			<div class="mb-3">
-				<span class="{kindColors[kind.name] || 'bg-neutral-600'} text-white px-2 py-1 rounded text-xs font-medium">
+			<div class="absolute top-2 left-2">
+				<span class="{kindColors[kind.name] || 'bg-gray-700'} text-white px-2 py-0.5 rounded text-[10px] font-medium shadow-lg">
 					{kind.name}
 				</span>
 			</div>
 		{/if}
+	</div>
 
-		<!-- URL -->
-		<div class="flex items-center text-neutral-400 text-xs mb-3">
-			<span class="truncate">{new URL(bookmark.url).hostname}</span>
+	<!-- Content Section -->
+	<div class="p-3">
+		<!-- Favicon and URL -->
+		<div class="flex items-center gap-2 mb-2">
+			<img src={getFaviconUrl(bookmark.url)} alt="" class="w-4 h-4 rounded" />
+			<span class="text-gray-500 text-xs truncate">{new URL(bookmark.url).hostname}</span>
 		</div>
+		
+		<!-- Title -->
+		<h3 class="font-medium text-gray-200 text-sm line-clamp-2 mb-1">
+			{bookmark.title}
+		</h3>
+		
+		<!-- Tags -->
+		{#if bookmark.tags && bookmark.tags.length > 0}
+			<div class="flex flex-wrap gap-1 mt-2">
+				{#each bookmark.tags.slice(0, 3) as tag}
+					<span class="bg-gray-800/50 text-gray-400 px-1.5 py-0.5 rounded text-[10px]">
+						{tag}
+					</span>
+				{/each}
+				{#if bookmark.tags.length > 3}
+					<span class="text-gray-500 text-[10px]">+{bookmark.tags.length - 3}</span>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>
