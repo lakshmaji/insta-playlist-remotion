@@ -56,14 +56,19 @@
 	}
 </script>
 
-<div class="category-tree">
-	<div class="tree-header">
-		<h3>Categories</h3>
-		<button onclick={() => onAdd()} class="btn-add-category">+ New Category</button>
+<div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm p-4 h-full overflow-y-auto">
+	<div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gradient-to-r from-blue-200 to-purple-200">
+		<h3 class="m-0 text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+			<span>📁</span>
+			Categories
+		</h3>
+		<button onclick={() => onAdd()} class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white border-none rounded-lg cursor-pointer text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow-md">
+			+ New
+		</button>
 	</div>
 
-	<div class="tree-item" class:selected={!selectedCategoryId} onclick={() => onSelect(undefined)}>
-		<span>📚 All Bookmarks</span>
+	<div class="py-2 px-3 mb-2 rounded-lg cursor-pointer transition-all {!selectedCategoryId ? 'bg-gradient-to-r from-blue-100 to-purple-100 font-semibold shadow-sm' : 'hover:bg-gray-50'}" onclick={() => onSelect(undefined)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && onSelect(undefined)}>
+		<span class="text-base">📚 All Bookmarks</span>
 	</div>
 
 	{#each tree as category}
@@ -73,15 +78,17 @@
 
 {#snippet categoryNode(category: CategoryNode, level: number)}
 	{@const expanded = isExpanded(category.id)}
-	<div class="tree-item" style="padding-left: {level * 1.5 + 1}rem">
+	<div class="py-2 cursor-pointer rounded-lg mb-1 transition-all hover:bg-gray-50" style="padding-left: {level * 1.5 + 1}rem">
 		<div
-			class="category-content"
-			class:selected={selectedCategoryId === category.id}
+			class="flex items-center gap-2 py-1 px-2 rounded-lg transition-all {selectedCategoryId === category.id ? 'bg-gradient-to-r from-blue-100 to-purple-100 font-semibold shadow-sm' : ''}"
 			onclick={() => onSelect(category.id)}
+			role="button"
+			tabindex="0"
+			onkeydown={(e) => e.key === 'Enter' && onSelect(category.id)}
 		>
 			{#if category.children.length > 0}
 				<button
-					class="expand-btn"
+					class="bg-none border-none cursor-pointer p-0 w-5 h-5 flex items-center justify-center text-xs hover:bg-gray-200 rounded transition-all"
 					onclick={(e) => {
 						e.stopPropagation();
 						toggleExpanded(category.id);
@@ -90,28 +97,28 @@
 					{expanded ? '▼' : '▶'}
 				</button>
 			{:else}
-				<span class="expand-placeholder"></span>
+				<span class="w-5 h-5 inline-block"></span>
 			{/if}
 
-			<span class="category-name">📁 {category.name}</span>
+			<span class="flex-1 text-sm">📁 {category.name}</span>
 
-			<div class="category-actions">
+			<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 				<button
 					onclick={(e) => {
 						e.stopPropagation();
 						onAdd(category.id);
 					}}
-					class="btn-action"
+					class="bg-none border-none cursor-pointer p-1 text-sm rounded hover:bg-blue-100 transition-all"
 					title="Add subcategory"
 				>
-					+
+					➕
 				</button>
 				<button
 					onclick={(e) => {
 						e.stopPropagation();
 						onEdit(category);
 					}}
-					class="btn-action"
+					class="bg-none border-none cursor-pointer p-1 text-sm rounded hover:bg-yellow-100 transition-all"
 					title="Edit"
 				>
 					✏️
@@ -121,7 +128,7 @@
 						e.stopPropagation();
 						onDelete(category.id);
 					}}
-					class="btn-action"
+					class="bg-none border-none cursor-pointer p-1 text-sm rounded hover:bg-red-100 transition-all"
 					title="Delete"
 				>
 					🗑️
@@ -138,112 +145,12 @@
 {/snippet}
 
 <style>
-	.category-tree {
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		background: white;
-		padding: 1rem;
-		height: 100%;
-		overflow-y: auto;
+	/* Add hover effect for showing action buttons */
+	:global(.category-tree) {
+		container-type: inline-size;
 	}
-
-	.tree-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-		padding-bottom: 0.5rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	.tree-header h3 {
-		margin: 0;
-		font-size: 1.25rem;
-	}
-
-	.btn-add-category {
-		padding: 0.5rem 1rem;
-		background-color: #10b981;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.875rem;
-	}
-
-	.btn-add-category:hover {
-		background-color: #059669;
-	}
-
-	.tree-item {
-		cursor: pointer;
-		padding: 0.5rem;
-		border-radius: 4px;
-		margin-bottom: 0.25rem;
-		transition: background-color 0.2s;
-	}
-
-	.tree-item:hover {
-		background-color: #f3f4f6;
-	}
-
-	.tree-item.selected {
-		background-color: #dbeafe;
-		font-weight: 600;
-	}
-
-	.category-content {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem;
-		border-radius: 4px;
-	}
-
-	.expand-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0;
-		width: 20px;
-		height: 20px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 0.75rem;
-	}
-
-	.expand-placeholder {
-		width: 20px;
-		height: 20px;
-		display: inline-block;
-	}
-
-	.category-name {
-		flex: 1;
-	}
-
-	.category-actions {
-		display: flex;
-		gap: 0.25rem;
-		opacity: 0;
-		transition: opacity 0.2s;
-	}
-
-	.tree-item:hover .category-actions {
-		opacity: 1;
-	}
-
-	.btn-action {
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.25rem;
-		font-size: 0.875rem;
-		border-radius: 3px;
-	}
-
-	.btn-action:hover {
-		background-color: #e5e7eb;
+	
+	div:hover > div > div {
+		opacity: 1 !important;
 	}
 </style>

@@ -2,6 +2,23 @@
 
 A full-featured bookmark management application built with SvelteKit, organized as a Turborepo monorepo.
 
+## Screenshots
+
+### Main Interface
+![Main UI](https://github.com/user-attachments/assets/c44f666e-f379-4752-9f62-94e90b533cff)
+
+*Modern gradient design with improved Tailwind CSS styling*
+
+### Bookmark Card with Details
+![Bookmark Card](https://github.com/user-attachments/assets/2b7d2fb5-a142-48c6-8cb9-87b0defbcdac)
+
+*Beautiful card design with status badges, tags, and hover effects*
+
+### Add/Edit Bookmark Modal
+![Add Bookmark Modal](https://github.com/user-attachments/assets/d3fe5ae9-75bf-4199-8924-14856cbcdff5)
+
+*Clean modal design with gradient header and improved form inputs*
+
 ## Features
 
 - **Bookmark Management**: Add, edit, delete, and organize bookmarks with thumbnails
