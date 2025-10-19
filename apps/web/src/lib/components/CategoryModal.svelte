@@ -39,28 +39,31 @@
 	}
 </script>
 
-<div class="modal-overlay" onclick={onClose}>
-	<div class="modal-content" onclick={(e) => e.stopPropagation()}>
-		<div class="modal-header">
-			<h2>{category ? 'Edit' : 'Add'} Category</h2>
-			<button class="close-btn" onclick={onClose}>×</button>
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick={onClose} role="dialog" tabindex="-1">
+	<div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl" onclick={(e) => e.stopPropagation()} role="document">
+		<div class="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+			<h2 class="m-0 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+				{category ? '✏️ Edit' : '➕ Add'} Category
+			</h2>
+			<button class="bg-none border-none text-3xl cursor-pointer text-gray-400 p-0 w-10 h-10 flex items-center justify-center leading-none hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all" onclick={onClose}>×</button>
 		</div>
 
-		<form onsubmit={handleSubmit}>
-			<div class="form-group">
-				<label for="name">Category Name *</label>
+		<form onsubmit={handleSubmit} class="p-6">
+			<div class="mb-5">
+				<label for="name" class="block mb-2 font-semibold text-gray-700">Category Name *</label>
 				<input
 					type="text"
 					id="name"
 					bind:value={formData.name}
 					required
 					placeholder="e.g., Frontend Development"
+					class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
 				/>
 			</div>
 
-			<div class="form-group">
-				<label for="parent">Parent Category</label>
-				<select id="parent" bind:value={formData.parentId}>
+			<div class="mb-5">
+				<label for="parent" class="block mb-2 font-semibold text-gray-700">Parent Category</label>
+				<select id="parent" bind:value={formData.parentId} class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
 					<option value="">No parent (root category)</option>
 					{#each categories.filter((c) => !category || c.id !== category.id) as cat}
 						<option value={cat.id}>{cat.name}</option>
@@ -68,134 +71,10 @@
 				</select>
 			</div>
 
-			<div class="modal-actions">
-				<button type="button" onclick={onClose} class="btn-cancel">Cancel</button>
-				<button type="submit" class="btn-save">Save</button>
+			<div class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+				<button type="button" onclick={onClose} class="px-6 py-3 bg-gray-100 text-gray-700 border-none rounded-lg cursor-pointer text-base font-semibold hover:bg-gray-200 transition-all">Cancel</button>
+				<button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer text-base font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg">Save</button>
 			</div>
 		</form>
 	</div>
 </div>
-
-<style>
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-		padding: 1rem;
-	}
-
-	.modal-content {
-		background: white;
-		border-radius: 8px;
-		width: 100%;
-		max-width: 500px;
-	}
-
-	.modal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
-	}
-
-	.modal-header h2 {
-		margin: 0;
-		font-size: 1.5rem;
-	}
-
-	.close-btn {
-		background: none;
-		border: none;
-		font-size: 2rem;
-		cursor: pointer;
-		color: #6b7280;
-		padding: 0;
-		width: 32px;
-		height: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		line-height: 1;
-	}
-
-	.close-btn:hover {
-		color: #1f2937;
-	}
-
-	form {
-		padding: 1.5rem;
-	}
-
-	.form-group {
-		margin-bottom: 1.5rem;
-	}
-
-	label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	input,
-	select {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #d1d5db;
-		border-radius: 4px;
-		font-size: 1rem;
-		font-family: inherit;
-	}
-
-	input:focus,
-	select:focus {
-		outline: none;
-		border-color: #3b82f6;
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-	}
-
-	.modal-actions {
-		display: flex;
-		gap: 1rem;
-		justify-content: flex-end;
-		padding-top: 1rem;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	.btn-cancel,
-	.btn-save {
-		padding: 0.75rem 1.5rem;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 1rem;
-		font-weight: 600;
-		transition: background-color 0.2s;
-	}
-
-	.btn-cancel {
-		background-color: #f3f4f6;
-		color: #374151;
-	}
-
-	.btn-cancel:hover {
-		background-color: #e5e7eb;
-	}
-
-	.btn-save {
-		background-color: #3b82f6;
-		color: white;
-	}
-
-	.btn-save:hover {
-		background-color: #2563eb;
-	}
-</style>
