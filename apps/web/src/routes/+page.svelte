@@ -9,12 +9,14 @@
 	import KindSelector from '$lib/components/KindSelector.svelte';
 	import ImportExportModal from '$lib/components/ImportExportModal.svelte';
 	import TodoPanel from '$lib/components/TodoPanel.svelte';
+	import Sidebar from '$lib/components/Sidebar.svelte';
 
 	let selectedCollectionId = $state<string | undefined>(undefined);
 	let selectedKindId = $state<string | undefined>(undefined);
 	let searchQuery = $state('');
 	let selectedTags = $state<string[]>([]);
 	let statusFilter = $state<Bookmark['status'] | 'all'>('all');
+	let selectedSection = $state<string>('all');
 
 	let showBookmarkModal = $state(false);
 	let showCollectionModal = $state(false);
@@ -179,23 +181,41 @@
 
 	<div class="flex-1 grid lg:grid-cols-[320px_1fr] gap-5 p-4 md:p-6 max-w-screen-2xl mx-auto w-full">
 		<aside class="flex flex-col gap-5 h-fit lg:sticky lg:top-24">
-			<KindSelector
+			<Sidebar
+				selectedSection={selectedSection}
+				onSelectSection={(section) => {
+					selectedSection = section;
+					if (section === 'all') {
+						selectedCollectionId = undefined;
+					}
+					if (section === 'inbox') {
+						statusFilter = 'unread';
+					} else if (section === 'reading') {
+						statusFilter = 'reading';
+					} else if (section === 'archive') {
+						statusFilter = 'archived';
+					} else {
+						statusFilter = 'all';
+					}
+				}}
 				kinds={kinds}
 				selectedKindId={selectedKindId}
-				onSelect={(id) => (selectedKindId = id)}
-				onEdit={openEditKind}
-				onDelete={deleteKind}
-				onAdd={openAddKind}
+				onSelectKind={(id) => (selectedKindId = id)}
+				onAddKind={openAddKind}
+				onAddBookmark={openAddBookmark}
+				onAddCollection={openAddCollection}
 			/>
 			
-			<CollectionTree
-				collections={collections}
-				selectedCollectionId={selectedCollectionId}
-				onSelect={(id) => (selectedCollectionId = id)}
-				onEdit={openEditCollection}
-				onDelete={deleteCollection}
-				onAdd={openAddCollection}
-			/>
+			{#if selectedSection === 'collections'}
+				<CollectionTree
+					collections={collections}
+					selectedCollectionId={selectedCollectionId}
+					onSelect={(id) => (selectedCollectionId = id)}
+					onEdit={openEditCollection}
+					onDelete={deleteCollection}
+					onAdd={openAddCollection}
+				/>
+			{/if}
 
 			<div class="max-h-96">
 				<TodoPanel todos={todos} collections={collections} />
