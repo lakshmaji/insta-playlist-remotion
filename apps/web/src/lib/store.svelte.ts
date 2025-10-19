@@ -1,11 +1,12 @@
-import type { Bookmark, Category, Tag, TodoItem } from './types';
+import type { Bookmark, Collection, Kind, Tag, TodoItem } from './types';
 import { browser } from '$app/environment';
 
 const STORAGE_KEY = 'bookmarks-data';
 
 interface AppState {
 	bookmarks: Bookmark[];
-	categories: Category[];
+	collections: Collection[];
+	kinds: Kind[];
 	tags: Tag[];
 	todos: TodoItem[];
 }
@@ -14,7 +15,8 @@ function loadFromStorage(): AppState {
 	if (!browser) {
 		return {
 			bookmarks: [],
-			categories: [],
+			collections: [],
+			kinds: [],
 			tags: [],
 			todos: []
 		};
@@ -35,6 +37,18 @@ function loadFromStorage(): AppState {
 				createdAt: new Date(t.createdAt),
 				updatedAt: new Date(t.updatedAt)
 			}));
+			
+			// Handle backward compatibility - convert categories to collections
+			if (parsed.categories && !parsed.collections) {
+				parsed.collections = parsed.categories;
+				delete parsed.categories;
+			}
+			
+			// Initialize kinds if not present
+			if (!parsed.kinds) {
+				parsed.kinds = [];
+			}
+			
 			return parsed;
 		}
 	} catch (e) {
@@ -43,7 +57,8 @@ function loadFromStorage(): AppState {
 
 	return {
 		bookmarks: [],
-		categories: [],
+		collections: [],
+		kinds: [],
 		tags: [],
 		todos: []
 	};
@@ -66,8 +81,12 @@ class BookmarkStore {
 		return this.state.bookmarks;
 	}
 
-	get categories() {
-		return this.state.categories;
+	get collections() {
+		return this.state.collections;
+	}
+
+	get kinds() {
+		return this.state.kinds;
 	}
 
 	get tags() {
@@ -108,43 +127,74 @@ class BookmarkStore {
 		saveToStorage(this.state);
 	}
 
-	// Category operations
-	addCategory(category: Omit<Category, 'id'>) {
-		const newCategory: Category = {
-			...category,
+	// Collection operations
+	addCollection(collection: Omit<Collection, 'id'>) {
+		const newCollection: Collection = {
+			...collection,
 			id: crypto.randomUUID()
 		};
-		this.state.categories.push(newCategory);
+		this.state.collections.push(newCollection);
 		saveToStorage(this.state);
-		return newCategory;
+		return newCollection;
 	}
 
-	updateCategory(id: string, updates: Partial<Category>) {
-		const index = this.state.categories.findIndex((c) => c.id === id);
+	updateCollection(id: string, updates: Partial<Collection>) {
+		const index = this.state.collections.findIndex((c) => c.id === id);
 		if (index !== -1) {
-			this.state.categories[index] = {
-				...this.state.categories[index],
+			this.state.collections[index] = {
+				...this.state.collections[index],
 				...updates
 			};
 			saveToStorage(this.state);
 		}
 	}
 
-	deleteCategory(id: string) {
-		// Remove the category and all its children
+	deleteCollection(id: string) {
+		// Remove the collection and all its children
 		const removeChildren = (parentId: string) => {
-			const children = this.state.categories.filter((c) => c.parentId === parentId);
+			const children = this.state.collections.filter((c) => c.parentId === parentId);
 			children.forEach((child) => {
 				removeChildren(child.id);
-				this.state.categories = this.state.categories.filter((c) => c.id !== child.id);
+				this.state.collections = this.state.collections.filter((c) => c.id !== child.id);
 			});
 		};
 
 		removeChildren(id);
-		this.state.categories = this.state.categories.filter((c) => c.id !== id);
-		// Update bookmarks that reference this category
+		this.state.collections = this.state.collections.filter((c) => c.id !== id);
+		// Update bookmarks that reference this collection
 		this.state.bookmarks = this.state.bookmarks.map((b) =>
-			b.categoryId === id ? { ...b, categoryId: undefined } : b
+			b.collectionId === id ? { ...b, collectionId: undefined } : b
+		);
+		saveToStorage(this.state);
+	}
+	
+	// Kind operations
+	addKind(kind: Omit<Kind, 'id'>) {
+		const newKind: Kind = {
+			...kind,
+			id: crypto.randomUUID()
+		};
+		this.state.kinds.push(newKind);
+		saveToStorage(this.state);
+		return newKind;
+	}
+
+	updateKind(id: string, updates: Partial<Kind>) {
+		const index = this.state.kinds.findIndex((k) => k.id === id);
+		if (index !== -1) {
+			this.state.kinds[index] = {
+				...this.state.kinds[index],
+				...updates
+			};
+			saveToStorage(this.state);
+		}
+	}
+
+	deleteKind(id: string) {
+		this.state.kinds = this.state.kinds.filter((k) => k.id !== id);
+		// Update bookmarks that reference this kind
+		this.state.bookmarks = this.state.bookmarks.map((b) =>
+			b.kindId === id ? { ...b, kindId: undefined } : b
 		);
 		saveToStorage(this.state);
 	}
@@ -215,7 +265,8 @@ class BookmarkStore {
 	exportData() {
 		return {
 			bookmarks: this.state.bookmarks,
-			categories: this.state.categories,
+			collections: this.state.collections,
+			kinds: this.state.kinds,
 			tags: this.state.tags,
 			todos: this.state.todos,
 			exportDate: new Date().toISOString()
@@ -224,7 +275,8 @@ class BookmarkStore {
 
 	importData(data: {
 		bookmarks?: Bookmark[];
-		categories?: Category[];
+		collections?: Collection[];
+		kinds?: Kind[];
 		tags?: Tag[];
 		todos?: TodoItem[];
 	}) {
@@ -239,10 +291,17 @@ class BookmarkStore {
 				}
 			});
 		}
-		if (data.categories) {
-			data.categories.forEach((c) => {
-				if (!this.state.categories.find((existing) => existing.name === c.name)) {
-					this.state.categories.push(c);
+		if (data.collections) {
+			data.collections.forEach((c) => {
+				if (!this.state.collections.find((existing) => existing.name === c.name)) {
+					this.state.collections.push(c);
+				}
+			});
+		}
+		if (data.kinds) {
+			data.kinds.forEach((k) => {
+				if (!this.state.kinds.find((existing) => existing.name === k.name)) {
+					this.state.kinds.push(k);
 				}
 			});
 		}
@@ -268,7 +327,8 @@ class BookmarkStore {
 	clearAll() {
 		this.state = {
 			bookmarks: [],
-			categories: [],
+			collections: [],
+			kinds: [],
 			tags: [],
 			todos: []
 		};

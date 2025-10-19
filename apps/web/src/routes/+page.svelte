@@ -1,36 +1,47 @@
 <script lang="ts">
 	import { bookmarkStore } from '$lib/store.svelte';
-	import type { Bookmark, Category } from '$lib/types';
+	import type { Bookmark, Collection, Kind } from '$lib/types';
 	import BookmarkCard from '$lib/components/BookmarkCard.svelte';
-	import CategoryTree from '$lib/components/CategoryTree.svelte';
+	import CollectionTree from '$lib/components/CollectionTree.svelte';
 	import BookmarkModal from '$lib/components/BookmarkModal.svelte';
-	import CategoryModal from '$lib/components/CategoryModal.svelte';
+	import CollectionModal from '$lib/components/CollectionModal.svelte';
+	import KindModal from '$lib/components/KindModal.svelte';
+	import KindSelector from '$lib/components/KindSelector.svelte';
 	import ImportExportModal from '$lib/components/ImportExportModal.svelte';
 	import TodoPanel from '$lib/components/TodoPanel.svelte';
 
-	let selectedCategoryId = $state<string | undefined>(undefined);
+	let selectedCollectionId = $state<string | undefined>(undefined);
+	let selectedKindId = $state<string | undefined>(undefined);
 	let searchQuery = $state('');
 	let selectedTags = $state<string[]>([]);
 	let statusFilter = $state<Bookmark['status'] | 'all'>('all');
 
 	let showBookmarkModal = $state(false);
-	let showCategoryModal = $state(false);
+	let showCollectionModal = $state(false);
+	let showKindModal = $state(false);
 	let showImportExportModal = $state(false);
 	let editingBookmark = $state<Bookmark | undefined>(undefined);
-	let editingCategory = $state<Category | undefined>(undefined);
-	let newCategoryParentId = $state<string | undefined>(undefined);
+	let editingCollection = $state<Collection | undefined>(undefined);
+	let editingKind = $state<Kind | undefined>(undefined);
+	let newCollectionParentId = $state<string | undefined>(undefined);
 
 	const bookmarks = $derived(bookmarkStore.bookmarks);
-	const categories = $derived(bookmarkStore.categories);
+	const collections = $derived(bookmarkStore.collections);
+	const kinds = $derived(bookmarkStore.kinds);
 	const tags = $derived(bookmarkStore.tags);
 	const todos = $derived(bookmarkStore.todos);
 
 	const filteredBookmarks = $derived(() => {
 		let filtered = bookmarks;
 
-		// Filter by category
-		if (selectedCategoryId) {
-			filtered = filtered.filter((b) => b.categoryId === selectedCategoryId);
+		// Filter by collection
+		if (selectedCollectionId) {
+			filtered = filtered.filter((b) => b.collectionId === selectedCollectionId);
+		}
+
+		// Filter by kind
+		if (selectedKindId) {
+			filtered = filtered.filter((b) => b.kindId === selectedKindId);
 		}
 
 		// Filter by search query
@@ -78,22 +89,37 @@
 		editingBookmark = undefined;
 	}
 
-	function openAddCategory(parentId?: string) {
-		editingCategory = undefined;
-		newCategoryParentId = parentId;
-		showCategoryModal = true;
+	function openAddCollection(parentId?: string) {
+		editingCollection = undefined;
+		newCollectionParentId = parentId;
+		showCollectionModal = true;
 	}
 
-	function openEditCategory(category: Category) {
-		editingCategory = category;
-		newCategoryParentId = undefined;
-		showCategoryModal = true;
+	function openEditCollection(collection: Collection) {
+		editingCollection = collection;
+		newCollectionParentId = undefined;
+		showCollectionModal = true;
 	}
 
-	function closeCategoryModal() {
-		showCategoryModal = false;
-		editingCategory = undefined;
-		newCategoryParentId = undefined;
+	function closeCollectionModal() {
+		showCollectionModal = false;
+		editingCollection = undefined;
+		newCollectionParentId = undefined;
+	}
+	
+	function openAddKind() {
+		editingKind = undefined;
+		showKindModal = true;
+	}
+
+	function openEditKind(kind: Kind) {
+		editingKind = kind;
+		showKindModal = true;
+	}
+
+	function closeKindModal() {
+		showKindModal = false;
+		editingKind = undefined;
 	}
 
 	function deleteBookmark(id: string) {
@@ -102,9 +128,15 @@
 		}
 	}
 
-	function deleteCategory(id: string) {
-		if (confirm('Are you sure you want to delete this category and all its subcategories?')) {
-			bookmarkStore.deleteCategory(id);
+	function deleteCollection(id: string) {
+		if (confirm('Are you sure you want to delete this collection and all its subcollections?')) {
+			bookmarkStore.deleteCollection(id);
+		}
+	}
+	
+	function deleteKind(id: string) {
+		if (confirm('Are you sure you want to delete this kind?')) {
+			bookmarkStore.deleteKind(id);
 		}
 	}
 
@@ -147,17 +179,26 @@
 
 	<div class="flex-1 grid lg:grid-cols-[320px_1fr] gap-5 p-4 md:p-6 max-w-screen-2xl mx-auto w-full">
 		<aside class="flex flex-col gap-5 h-fit lg:sticky lg:top-24">
-			<CategoryTree
-				{categories}
-				{selectedCategoryId}
-				onSelect={(id) => (selectedCategoryId = id)}
-				onEdit={openEditCategory}
-				onDelete={deleteCategory}
-				onAdd={openAddCategory}
+			<KindSelector
+				kinds={kinds}
+				selectedKindId={selectedKindId}
+				onSelect={(id) => (selectedKindId = id)}
+				onEdit={openEditKind}
+				onDelete={deleteKind}
+				onAdd={openAddKind}
+			/>
+			
+			<CollectionTree
+				collections={collections}
+				selectedCollectionId={selectedCollectionId}
+				onSelect={(id) => (selectedCollectionId = id)}
+				onEdit={openEditCollection}
+				onDelete={deleteCollection}
+				onAdd={openAddCollection}
 			/>
 
 			<div class="max-h-96">
-				<TodoPanel {todos} {categories} />
+				<TodoPanel todos={todos} collections={collections} />
 			</div>
 		</aside>
 
@@ -240,19 +281,29 @@
 {#if showBookmarkModal}
 	<BookmarkModal
 		bookmark={editingBookmark}
-		{categories}
+		collections={collections}
+		kinds={kinds}
 		onClose={closeBookmarkModal}
 		onSave={closeBookmarkModal}
 	/>
 {/if}
 
-{#if showCategoryModal}
-	<CategoryModal
-		category={editingCategory}
-		parentId={newCategoryParentId}
-		{categories}
-		onClose={closeCategoryModal}
-		onSave={closeCategoryModal}
+{#if showCollectionModal}
+	<CollectionModal
+		collection={editingCollection}
+		parentId={newCollectionParentId}
+		collections={collections}
+		onClose={closeCollectionModal}
+		onSave={closeCollectionModal}
+	/>
+{/if}
+
+{#if showKindModal}
+	<KindModal
+		kind={editingKind}
+		kinds={kinds}
+		onClose={closeKindModal}
+		onSave={closeKindModal}
 	/>
 {/if}
 

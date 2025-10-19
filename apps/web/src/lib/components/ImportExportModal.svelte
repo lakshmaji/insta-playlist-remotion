@@ -23,29 +23,29 @@
 			const content = event.target?.result as string;
 
 			if (importType === 'html') {
-				const { bookmarks, categories } = parseBookmarkHTML(content);
+				const { bookmarks, collections } = parseBookmarkHTML(content);
 
-				// Add categories first
-				const categoryMap = new Map<string, string>();
-				categories.forEach((cat) => {
-					const newCat = bookmarkStore.addCategory(cat);
-					if (cat.name) {
-						categoryMap.set(cat.name, newCat.id);
+				// Add collections first
+				const collectionMap = new Map<string, string>();
+				collections.forEach((col) => {
+					const newCol = bookmarkStore.addCollection(col);
+					if (col.name) {
+						collectionMap.set(col.name, newCol.id);
 					}
 				});
 
-				// Then add bookmarks with updated category IDs
+				// Then add bookmarks with updated collection IDs
 				bookmarks.forEach((bookmark) => {
-					const categoryId = bookmark.categoryId
-						? categoryMap.get(bookmark.categoryId)
+					const collectionId = bookmark.collectionId
+						? collectionMap.get(bookmark.collectionId)
 						: undefined;
 					bookmarkStore.addBookmark({
 						...bookmark,
-						categoryId
+						collectionId
 					});
 				});
 
-				alert(`Imported ${bookmarks.length} bookmarks and ${categories.length} categories!`);
+				alert(`Imported ${bookmarks.length} bookmarks and ${collections.length} collections!`);
 			} else if (importType === 'json') {
 				try {
 					const data = JSON.parse(content);
@@ -63,7 +63,7 @@
 	}
 
 	function exportHTML() {
-		const html = exportToBookmarkHTML(bookmarkStore.bookmarks, bookmarkStore.categories);
+		const html = exportToBookmarkHTML(bookmarkStore.bookmarks, bookmarkStore.collections);
 		downloadFile(html, 'bookmarks.html', 'text/html');
 		alert('Bookmarks exported to HTML!');
 	}

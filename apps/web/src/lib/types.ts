@@ -5,19 +5,28 @@ export interface Bookmark {
 	description?: string;
 	thumbnail?: string;
 	favicon?: string;
-	categoryId?: string;
+	collectionId?: string;
+	kindId?: string;
 	tags: string[];
 	status: 'unread' | 'reading' | 'completed' | 'archived';
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-export interface Category {
+export interface Collection {
 	id: string;
 	name: string;
 	parentId?: string;
 	order: number;
-	children?: Category[];
+	children?: Collection[];
+}
+
+export interface Kind {
+	id: string;
+	name: string;
+	description?: string;
+	icon?: string;
+	order: number;
 }
 
 export interface Tag {
@@ -31,7 +40,7 @@ export interface TodoItem {
 	title: string;
 	description?: string;
 	completed: boolean;
-	categoryId?: string;
+	collectionId?: string;
 	bookmarkIds: string[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -39,7 +48,8 @@ export interface TodoItem {
 
 export interface BookmarkExport {
 	bookmarks: Bookmark[];
-	categories: Category[];
+	collections: Collection[];
+	kinds: Kind[];
 	tags: Tag[];
 	todos: TodoItem[];
 	exportDate: string;

@@ -1,19 +1,19 @@
 <script lang="ts">
-	import type { TodoItem, Category } from '$lib/types';
+	import type { TodoItem, Collection } from '$lib/types';
 	import { bookmarkStore } from '$lib/store.svelte';
 
 	interface Props {
 		todos: TodoItem[];
-		categories: Category[];
+		collections: Collection[];
 	}
 
-	let { todos, categories }: Props = $props();
+	let { todos, collections }: Props = $props();
 
 	let showAddForm = $state(false);
 	let newTodo = $state({
 		title: '',
 		description: '',
-		categoryId: ''
+		collectionId: ''
 	});
 
 	function handleAddTodo() {
@@ -21,12 +21,12 @@
 			bookmarkStore.addTodo({
 				title: newTodo.title,
 				description: newTodo.description || undefined,
-				categoryId: newTodo.categoryId || undefined,
+				collectionId: newTodo.collectionId || undefined,
 				completed: false,
 				bookmarkIds: []
 			});
 
-			newTodo = { title: '', description: '', categoryId: '' };
+			newTodo = { title: '', description: '', collectionId: '' };
 			showAddForm = false;
 		}
 	}
@@ -41,11 +41,11 @@
 		}
 	}
 
-	const todosByCategory = $derived(() => {
+	const todosByCollection = $derived(() => {
 		const grouped = new Map<string | undefined, TodoItem[]>();
 
 		todos.forEach((todo) => {
-			const key = todo.categoryId || undefined;
+			const key = todo.collectionId || undefined;
 			if (!grouped.has(key)) {
 				grouped.set(key, []);
 			}
@@ -81,10 +81,10 @@
 				placeholder="Description (optional)"
 				class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 			/>
-			<select bind:value={newTodo.categoryId} class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-				<option value="">No category</option>
-				{#each categories as cat}
-					<option value={cat.id}>{cat.name}</option>
+			<select bind:value={newTodo.collectionId} class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+				<option value="">No collection</option>
+				{#each collections as col}
+					<option value={col.id}>{col.name}</option>
 				{/each}
 			</select>
 			<div class="flex gap-2">
@@ -102,13 +102,13 @@
 		{#if todos.length === 0}
 			<p class="text-center text-gray-400 py-8 text-sm">No todos yet. Create one to get started!</p>
 		{:else}
-			{#each Array.from(todosByCategory()) as [categoryId, categoryTodos]}
-				{@const category = categories.find((c) => c.id === categoryId)}
+			{#each Array.from(todosByCollection()) as [collectionId, collectionTodos]}
+				{@const collection = collections.find((c) => c.id === collectionId)}
 				<div class="mb-3">
 					<h4 class="text-xs text-gray-600 m-0 mb-2 uppercase font-semibold tracking-wide">
-						{category?.name || 'Uncategorized'}
+						{collection?.name || 'Uncategorized'}
 					</h4>
-					{#each categoryTodos as todo}
+					{#each collectionTodos as todo}
 						<div class="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 mb-2 transition-all hover:from-gray-100 hover:to-gray-150 {todo.completed ? 'opacity-60' : ''}">
 							<input
 								type="checkbox"

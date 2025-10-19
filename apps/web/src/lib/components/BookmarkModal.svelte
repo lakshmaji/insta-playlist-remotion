@@ -1,22 +1,24 @@
 <script lang="ts">
-	import type { Bookmark, Category } from '$lib/types';
+	import type { Bookmark, Collection, Kind } from '$lib/types';
 	import { bookmarkStore } from '$lib/store.svelte';
 	import { getFaviconUrl } from '$lib/utils';
 
 	interface Props {
 		bookmark?: Bookmark;
-		categories: Category[];
+		collections: Collection[];
+		kinds: Kind[];
 		onClose: () => void;
 		onSave: () => void;
 	}
 
-	let { bookmark, categories, onClose, onSave }: Props = $props();
+	let { bookmark, collections, kinds, onClose, onSave }: Props = $props();
 
 	let formData = $state({
 		title: bookmark?.title || '',
 		url: bookmark?.url || '',
 		description: bookmark?.description || '',
-		categoryId: bookmark?.categoryId || '',
+		collectionId: bookmark?.collectionId || '',
+		kindId: bookmark?.kindId || '',
 		tags: bookmark?.tags.join(', ') || '',
 		status: bookmark?.status || 'unread'
 	});
@@ -34,7 +36,8 @@
 				title: formData.title,
 				url: formData.url,
 				description: formData.description || undefined,
-				categoryId: formData.categoryId || undefined,
+				collectionId: formData.collectionId || undefined,
+				kindId: formData.kindId || undefined,
 				tags,
 				status: formData.status as Bookmark['status'],
 				favicon: getFaviconUrl(formData.url)
@@ -44,7 +47,8 @@
 				title: formData.title,
 				url: formData.url,
 				description: formData.description || undefined,
-				categoryId: formData.categoryId || undefined,
+				collectionId: formData.collectionId || undefined,
+				kindId: formData.kindId || undefined,
 				tags,
 				status: formData.status as Bookmark['status'],
 				favicon: getFaviconUrl(formData.url)
@@ -103,11 +107,21 @@
 			</div>
 
 			<div class="mb-5">
-				<label for="category" class="block mb-2 font-semibold text-gray-700">Category</label>
-				<select id="category" bind:value={formData.categoryId} class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-					<option value="">No category</option>
-					{#each categories as cat}
-						<option value={cat.id}>{cat.name}</option>
+				<label for="collection" class="block mb-2 font-semibold text-gray-700">Collection</label>
+				<select id="collection" bind:value={formData.collectionId} class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+					<option value="">No collection</option>
+					{#each collections as col}
+						<option value={col.id}>{col.name}</option>
+					{/each}
+				</select>
+			</div>
+			
+			<div class="mb-5">
+				<label for="kind" class="block mb-2 font-semibold text-gray-700">Kind</label>
+				<select id="kind" bind:value={formData.kindId} class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+					<option value="">No kind</option>
+					{#each kinds as kind}
+						<option value={kind.id}>{kind.icon || '📄'} {kind.name}</option>
 					{/each}
 				</select>
 			</div>
