@@ -1,5 +1,6 @@
 import type { Bookmark, Collection, Kind, Tag, TodoItem } from './types';
 import { browser } from '$app/environment';
+import { getSeedData } from './seed';
 
 const STORAGE_KEY = 'bookmarks-data';
 
@@ -55,13 +56,8 @@ function loadFromStorage(): AppState {
 		console.error('Failed to load data from localStorage:', e);
 	}
 
-	return {
-		bookmarks: [],
-		collections: [],
-		kinds: [],
-		tags: [],
-		todos: []
-	};
+	// Use seed data for local development if no existing data
+	return getSeedData();
 }
 
 function saveToStorage(state: AppState) {
@@ -95,6 +91,20 @@ class BookmarkStore {
 
 	get todos() {
 		return this.state.todos;
+	}
+	
+	// Reset store to seed data (useful for development)
+	resetToSeedData() {
+		if (confirm('Are you sure you want to reset all data? This will delete all your current bookmarks, collections, etc.')) {
+			const seedData = getSeedData();
+			this.state.bookmarks = seedData.bookmarks;
+			this.state.collections = seedData.collections;
+			this.state.kinds = seedData.kinds;
+			this.state.tags = seedData.tags;
+			this.state.todos = seedData.todos;
+			
+			saveToStorage(this.state);
+		}
 	}
 
 	// Bookmark operations
