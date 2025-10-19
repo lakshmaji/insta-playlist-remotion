@@ -12,9 +12,11 @@
 
 	let { categories, selectedCategoryId, onSelect, onEdit, onDelete, onAdd }: Props = $props();
 
-	function buildTree(cats: Category[]): (Category & { children: Category[] })[] {
-		const map = new Map<string, Category & { children: Category[] }>();
-		const roots: (Category & { children: Category[] })[] = [];
+	type CategoryNode = Category & { children: CategoryNode[] };
+
+	function buildTree(cats: Category[]): CategoryNode[] {
+		const map = new Map<string, CategoryNode>();
+		const roots: CategoryNode[] = [];
 
 		cats.forEach((cat) => {
 			map.set(cat.id, { ...cat, children: [] });
@@ -69,7 +71,7 @@
 	{/each}
 </div>
 
-{#snippet categoryNode(category: Category & { children: Category[] }, level: number)}
+{#snippet categoryNode(category: CategoryNode, level: number)}
 	{@const expanded = isExpanded(category.id)}
 	<div class="tree-item" style="padding-left: {level * 1.5 + 1}rem">
 		<div

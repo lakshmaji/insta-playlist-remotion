@@ -1,6 +1,6 @@
-# Bookmark Manager
+# Bookmark Manager Monorepo
 
-A full-featured bookmark management application built with SvelteKit.
+A full-featured bookmark management application built with SvelteKit, organized as a Turborepo monorepo.
 
 ## Features
 
@@ -168,29 +168,38 @@ The workflow will:
 2. Choose "Export as HTML" (browser-compatible) or "Export as JSON" (includes all data)
 3. File will be downloaded automatically
 
-## Project Structure
+## Monorepo Structure
+
+This project is organized as a Turborepo monorepo:
 
 ```
-src/
-├── lib/
-│   ├── components/          # Svelte components
-│   │   ├── BookmarkCard.svelte
-│   │   ├── CategoryTree.svelte
-│   │   ├── BookmarkModal.svelte
-│   │   ├── CategoryModal.svelte
-│   │   ├── ImportExportModal.svelte
-│   │   └── TodoPanel.svelte
-│   ├── store.svelte.ts      # State management with Svelte 5 runes
-│   ├── types.ts             # TypeScript type definitions
-│   └── utils.ts             # Utility functions (import/export, thumbnails)
-├── routes/
-│   ├── +page.svelte         # Main application page
-│   └── +layout.svelte       # Root layout
-└── app.html                 # HTML template
+├── apps/
+│   └── web/                 # Main SvelteKit application
+│       ├── src/
+│       │   ├── lib/
+│       │   │   ├── components/      # Svelte components
+│       │   │   │   ├── BookmarkCard.svelte
+│       │   │   │   ├── CategoryTree.svelte
+│       │   │   │   ├── BookmarkModal.svelte
+│       │   │   │   ├── CategoryModal.svelte
+│       │   │   │   ├── ImportExportModal.svelte
+│       │   │   │   └── TodoPanel.svelte
+│       │   │   ├── store.svelte.ts  # State management with Svelte 5 runes
+│       │   │   ├── types.ts         # TypeScript type definitions
+│       │   │   └── utils.ts         # Utility functions (import/export, thumbnails)
+│       │   └── routes/
+│       │       ├── +page.svelte     # Main application page
+│       │       └── +layout.svelte   # Root layout
+│       ├── static/                  # Static assets
+│       └── package.json             # App-specific dependencies
+├── packages/                # Shared packages (future use)
+├── turbo.json              # Turborepo configuration
+└── package.json            # Root package with workspace configuration
 ```
 
 ## Technologies Used
 
+- **Turborepo**: High-performance build system for monorepos
 - **SvelteKit**: Full-stack framework
 - **Svelte 5**: Latest Svelte with runes for reactivity
 - **TypeScript**: Type safety
