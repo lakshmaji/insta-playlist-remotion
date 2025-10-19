@@ -14,9 +14,15 @@
 		onSelectCollection: (collectionId: string | undefined) => void;
 		onSelectTag: (tagId: string | undefined) => void;
 		onAddKind: () => void;
+		onEditKind?: (kind: Kind) => void;
+		onDeleteKind?: (id: string) => void;
 		onAddBookmark: () => void;
 		onAddCollection: () => void;
+		onEditCollection?: (collection: Collection) => void;
+		onDeleteCollection?: (id: string) => void;
 		onAddTag: () => void;
+		onEditTag?: (tag: Tag) => void;
+		onDeleteTag?: (id: string) => void;
 		bookmarks?: any[];
 	}
 
@@ -33,9 +39,15 @@
 		onSelectCollection = () => {},
 		onSelectTag = () => {},
 		onAddKind,
+		onEditKind = () => {},
+		onDeleteKind = () => {},
 		onAddBookmark = () => {},
 		onAddCollection = () => {},
+		onEditCollection = () => {},
+		onDeleteCollection = () => {},
 		onAddTag = () => {},
+		onEditTag = () => {},
+		onDeleteTag = () => {},
 		bookmarks = []
 	}: Props = $props();
 
@@ -187,22 +199,45 @@
 		{#if kindsExpanded}
 			<div class="px-3 space-y-0.5">
 				{#each kinds as kind}
-					<button 
-						class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedKindId === kind.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}" 
-						onclick={() => onSelectKind(kind.id)}>
-						<div class="flex items-center gap-2">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd"></path>
-								<path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"></path>
-							</svg>
-							<span>{kind.name}</span>
+					<div class="group relative w-full">
+						<div class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedKindId === kind.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}">
+							<button 
+								class="flex-1 flex items-center gap-2 text-left bg-transparent border-none p-0 cursor-pointer"
+								onclick={() => onSelectKind(kind.id)}>
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd"></path>
+									<path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"></path>
+								</svg>
+								<span>{kind.name}</span>
+							</button>
+							
+							<div class="flex items-center gap-1">
+								{#if countBookmarks('kind', kind.id) > 0}
+									<span class="text-xs text-gray-500 mr-2">
+										{countBookmarks('kind', kind.id)}
+									</span>
+								{/if}
+								<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+									<button
+										onclick={() => onEditKind(kind)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Edit">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+										</svg>
+									</button>
+									<button
+										onclick={() => onDeleteKind(kind.id)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Delete">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+									</button>
+								</div>
+							</div>
 						</div>
-						{#if countBookmarks('kind', kind.id) > 0}
-							<span class="text-xs text-gray-500">
-								{countBookmarks('kind', kind.id)}
-							</span>
-						{/if}
-					</button>
+					</div>
 				{/each}
 				<button 
 					class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center gap-2 text-gray-500 hover:bg-gray-800/50 hover:text-gray-300" 
@@ -229,21 +264,44 @@
 		{#if collectionsExpanded}
 			<div class="px-3 space-y-0.5">
 				{#each rootCollections as collection}
-					<button 
-						class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedCollectionId === collection.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}" 
-						onclick={() => onSelectCollection(collection.id)}>
-						<div class="flex items-center gap-2">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-							</svg>
-							<span class="truncate">{collection.name}</span>
+					<div class="group relative w-full">
+						<div class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedCollectionId === collection.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}">
+							<button 
+								class="flex-1 flex items-center gap-2 text-left bg-transparent border-none p-0 cursor-pointer"
+								onclick={() => onSelectCollection(collection.id)}>
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+								</svg>
+								<span class="truncate">{collection.name}</span>
+							</button>
+							
+							<div class="flex items-center gap-1">
+								{#if countBookmarks('collection', collection.id) > 0}
+									<span class="text-xs text-gray-500 mr-2">
+										{countBookmarks('collection', collection.id)}
+									</span>
+								{/if}
+								<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+									<button
+										onclick={() => onEditCollection(collection)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Edit">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+										</svg>
+									</button>
+									<button
+										onclick={() => onDeleteCollection(collection.id)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Delete">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+									</button>
+								</div>
+							</div>
 						</div>
-						{#if countBookmarks('collection', collection.id) > 0}
-							<span class="text-xs text-gray-500">
-								{countBookmarks('collection', collection.id)}
-							</span>
-						{/if}
-					</button>
+					</div>
 				{/each}
 				<button 
 					class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center gap-2 text-gray-500 hover:bg-gray-800/50 hover:text-gray-300" 
@@ -270,21 +328,44 @@
 		{#if tagsExpanded}
 			<div class="px-3 space-y-0.5">
 				{#each tags as tag}
-					<button 
-						class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedTagId === tag.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}" 
-						onclick={() => onSelectTag(tag.id)}>
-						<div class="flex items-center gap-2">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-							</svg>
-							<span>{tag.name}</span>
+					<div class="group relative w-full">
+						<div class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center justify-between transition-all {selectedTagId === tag.id ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-gray-800/50'}">
+							<button 
+								class="flex-1 flex items-center gap-2 text-left bg-transparent border-none p-0 cursor-pointer"
+								onclick={() => onSelectTag(tag.id)}>
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+								</svg>
+								<span>{tag.name}</span>
+							</button>
+							
+							<div class="flex items-center gap-1">
+								{#if countBookmarks('tag', tag.id) > 0}
+									<span class="text-xs text-gray-500 mr-2">
+										{countBookmarks('tag', tag.id)}
+									</span>
+								{/if}
+								<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+									<button
+										onclick={() => onEditTag(tag)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Edit">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+										</svg>
+									</button>
+									<button
+										onclick={() => onDeleteTag(tag.id)}
+										class="p-1 hover:bg-gray-700 rounded transition-colors"
+										title="Delete">
+										<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+										</svg>
+									</button>
+								</div>
+							</div>
 						</div>
-						{#if countBookmarks('tag', tag.name) > 0}
-							<span class="text-xs text-gray-500">
-								{countBookmarks('tag', tag.name)}
-							</span>
-						{/if}
-					</button>
+					</div>
 				{/each}
 				<button 
 					class="w-full px-3 py-2 text-left text-sm rounded-md flex items-center gap-2 text-gray-500 hover:bg-gray-800/50 hover:text-gray-300" 

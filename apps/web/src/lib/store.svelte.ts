@@ -159,23 +159,30 @@ class BookmarkStore {
 		}
 	}
 
-	deleteCollection(id: string) {
-		// Remove the collection and all its children
-		const removeChildren = (parentId: string) => {
-			const children = this.state.collections.filter((c) => c.parentId === parentId);
-			children.forEach((child) => {
-				removeChildren(child.id);
-				this.state.collections = this.state.collections.filter((c) => c.id !== child.id);
-			});
-		};
+	deleteCollection(id: string): { success: boolean; message?: string } {
+		// Check if collection has child collections
+		const hasChildren = this.state.collections.some(c => c.parentId === id);
+		if (hasChildren) {
+			const childCount = this.state.collections.filter(c => c.parentId === id).length;
+			return { 
+				success: false, 
+				message: `Cannot delete this collection. It has ${childCount} sub-collection${childCount === 1 ? '' : 's'}. Please delete or move them first.`
+			};
+		}
+		
+		// Check if collection has associated bookmarks
+		const associatedBookmarks = this.state.bookmarks.filter(b => b.collectionId === id);
+		if (associatedBookmarks.length > 0) {
+			return { 
+				success: false, 
+				message: `Cannot delete this collection. It has ${associatedBookmarks.length} bookmark${associatedBookmarks.length === 1 ? '' : 's'}. Please reassign or delete these bookmarks first.`
+			};
+		}
 
-		removeChildren(id);
+		// Proceed with deletion
 		this.state.collections = this.state.collections.filter((c) => c.id !== id);
-		// Update bookmarks that reference this collection
-		this.state.bookmarks = this.state.bookmarks.map((b) =>
-			b.collectionId === id ? { ...b, collectionId: undefined } : b
-		);
 		saveToStorage(this.state);
+		return { success: true };
 	}
 	
 	// Kind operations
@@ -200,13 +207,25 @@ class BookmarkStore {
 		}
 	}
 
-	deleteKind(id: string) {
+	deleteKind(id: string): { success: boolean; message?: string } {
+		// Check if kind has associated bookmarks
+		const associatedBookmarks = this.state.bookmarks.filter(b => b.kindId === id);
+		
+		if (associatedBookmarks.length > 0) {
+			return { 
+				success: false, 
+				message: `Cannot delete this kind. It has ${associatedBookmarks.length} associated bookmark${associatedBookmarks.length === 1 ? '' : 's'}. Please reassign or delete these bookmarks first.`
+			};
+		}
+		
+		// Check if kind has associated todos (if todos can have kindId)
+		// Note: Based on the current TodoItem type, todos don't have kindId, but they have bookmarkIds
+		// So we don't need to check todos directly
+		
+		// Proceed with deletion
 		this.state.kinds = this.state.kinds.filter((k) => k.id !== id);
-		// Update bookmarks that reference this kind
-		this.state.bookmarks = this.state.bookmarks.map((b) =>
-			b.kindId === id ? { ...b, kindId: undefined } : b
-		);
 		saveToStorage(this.state);
+		return { success: true };
 	}
 
 	// Tag operations
@@ -231,14 +250,20 @@ class BookmarkStore {
 		}
 	}
 
-	deleteTag(id: string) {
+	deleteTag(id: string): { success: boolean; message?: string } {
+		// Check if tag is used in any bookmarks
+		const bookmarksUsingTag = this.state.bookmarks.filter(b => b.tags && b.tags.includes(id));
+		if (bookmarksUsingTag.length > 0) {
+			return { 
+				success: false, 
+				message: `Cannot delete this tag. It is used in ${bookmarksUsingTag.length} bookmark${bookmarksUsingTag.length === 1 ? '' : 's'}. Please remove it from all bookmarks first.`
+			};
+		}
+
+		// Proceed with deletion
 		this.state.tags = this.state.tags.filter((t) => t.id !== id);
-		// Remove tag from all bookmarks
-		this.state.bookmarks = this.state.bookmarks.map((b) => ({
-			...b,
-			tags: b.tags.filter((t) => t !== id)
-		}));
 		saveToStorage(this.state);
+		return { success: true };
 	}
 
 	// Todo operations

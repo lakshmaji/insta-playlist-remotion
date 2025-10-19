@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { bookmarkStore } from '$lib/store.svelte';
-	import type { Bookmark, Collection, Kind } from '$lib/types';
+	import type { Bookmark, Collection, Kind, Tag } from '$lib/types';
 	import BookmarkCard from '$lib/components/BookmarkCard.svelte';
 	import CollectionTree from '$lib/components/CollectionTree.svelte';
 	import BookmarkModal from '$lib/components/BookmarkModal.svelte';
 	import CollectionModal from '$lib/components/CollectionModal.svelte';
 	import KindModal from '$lib/components/KindModal.svelte';
+	import TagModal from '$lib/components/TagModal.svelte';
 	import KindSelector from '$lib/components/KindSelector.svelte';
 	import ImportExportModal from '$lib/components/ImportExportModal.svelte';
 	import TodoPanel from '$lib/components/TodoPanel.svelte';
@@ -24,10 +25,12 @@
 	let showBookmarkModal = $state(false);
 	let showCollectionModal = $state(false);
 	let showKindModal = $state(false);
+	let showTagModal = $state(false);
 	let showImportExportModal = $state(false);
 	let editingBookmark = $state<Bookmark | undefined>(undefined);
 	let editingCollection = $state<Collection | undefined>(undefined);
 	let editingKind = $state<Kind | undefined>(undefined);
+	let editingTag = $state<Tag | undefined>(undefined);
 	let newCollectionParentId = $state<string | undefined>(undefined);
 
 	const bookmarks = $derived(bookmarkStore.bookmarks);
@@ -126,6 +129,21 @@
 		showKindModal = false;
 		editingKind = undefined;
 	}
+	
+	function openAddTag() {
+		editingTag = undefined;
+		showTagModal = true;
+	}
+
+	function openEditTag(tag: Tag) {
+		editingTag = tag;
+		showTagModal = true;
+	}
+
+	function closeTagModal() {
+		showTagModal = false;
+		editingTag = undefined;
+	}
 
 	function deleteBookmark(id: string) {
 		if (confirm('Are you sure you want to delete this bookmark?')) {
@@ -134,14 +152,23 @@
 	}
 
 	function deleteCollection(id: string) {
-		if (confirm('Are you sure you want to delete this collection and all its subcollections?')) {
-			bookmarkStore.deleteCollection(id);
+		const result = bookmarkStore.deleteCollection(id);
+		if (!result.success) {
+			alert(result.message);
 		}
 	}
 	
 	function deleteKind(id: string) {
-		if (confirm('Are you sure you want to delete this kind?')) {
-			bookmarkStore.deleteKind(id);
+		const result = bookmarkStore.deleteKind(id);
+		if (!result.success) {
+			alert(result.message);
+		}
+	}
+	
+	function deleteTag(id: string) {
+		const result = bookmarkStore.deleteTag(id);
+		if (!result.success) {
+			alert(result.message);
 		}
 	}
 
@@ -189,9 +216,15 @@
 				onSelectCollection={(id) => (selectedCollectionId = id)}
 				onSelectTag={(id) => (selectedTagId = id)}
 				onAddKind={openAddKind}
+				onEditKind={openEditKind}
+				onDeleteKind={deleteKind}
+				onEditCollection={openEditCollection}
+				onDeleteCollection={deleteCollection}
+				onAddTag={openAddTag}
+				onEditTag={openEditTag}
+				onDeleteTag={deleteTag}
 				onAddBookmark={openAddBookmark}
 				onAddCollection={openAddCollection}
-				onAddTag={() => {}}
 			/>
 		</aside>
 		
@@ -469,15 +502,18 @@
 {#if showKindModal}
 	<KindModal
 		kind={editingKind}
-		onSave={(data) => {
-			if (editingKind) {
-				bookmarkStore.updateKind(editingKind.id, data);
-			} else {
-				bookmarkStore.addKind(data);
-			}
-			closeKindModal();
-		}}
+		kinds={kinds}
+		onSave={closeKindModal}
 		onClose={closeKindModal}
+	/>
+{/if}
+
+{#if showTagModal}
+	<TagModal
+		tag={editingTag}
+		tags={tags}
+		onSave={closeTagModal}
+		onClose={closeTagModal}
 	/>
 {/if}
 
