@@ -121,27 +121,32 @@
 	}
 </script>
 
-<div class="min-h-screen flex flex-col">
-	<header class="bg-white border-b border-gray-200 px-8 py-6 flex justify-between items-center">
-		<h1 class="text-3xl font-bold text-gray-800">📚 Bookmark Manager</h1>
-		<div class="flex gap-4">
+<div class="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
+	<header class="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm px-6 md:px-8 py-5 flex flex-wrap justify-between items-center sticky top-0 z-10">
+		<h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+			<span class="text-3xl md:text-4xl">📚</span>
+			Bookmark Manager
+		</h1>
+		<div class="flex gap-3 mt-3 md:mt-0">
 			<button
 				onclick={openAddBookmark}
-				class="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold text-sm hover:bg-blue-600 transition-all"
+				class="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold text-sm hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
 			>
-				+ Add Bookmark
+				<span class="hidden sm:inline">+ Add Bookmark</span>
+				<span class="sm:hidden">+ Add</span>
 			</button>
 			<button
 				onclick={() => (showImportExportModal = true)}
-				class="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-all"
+				class="px-5 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
 			>
-				Import / Export
+				<span class="hidden sm:inline">Import / Export</span>
+				<span class="sm:hidden">I/E</span>
 			</button>
 		</div>
 	</header>
 
-	<div class="flex-1 grid lg:grid-cols-[300px_1fr] gap-6 p-6 max-w-screen-2xl mx-auto w-full">
-		<aside class="flex flex-col gap-6 h-fit lg:sticky lg:top-6">
+	<div class="flex-1 grid lg:grid-cols-[320px_1fr] gap-5 p-4 md:p-6 max-w-screen-2xl mx-auto w-full">
+		<aside class="flex flex-col gap-5 h-fit lg:sticky lg:top-24">
 			<CategoryTree
 				{categories}
 				{selectedCategoryId}
@@ -157,13 +162,13 @@
 		</aside>
 
 		<main class="min-w-0">
-			<div class="flex gap-4 mb-6 flex-wrap">
+			<div class="flex gap-3 mb-5 flex-wrap bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-200">
 				<div class="flex-1 min-w-[200px]">
 					<input
 						type="search"
 						bind:value={searchQuery}
-						placeholder="Search bookmarks..."
-						class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						placeholder="🔍 Search bookmarks..."
+						class="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
 					/>
 				</div>
 
@@ -172,23 +177,26 @@
 						bind:value={statusFilter}
 						class="px-4 py-3 border border-gray-300 rounded-lg text-base bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
 					>
-						<option value="all">All Status</option>
-						<option value="unread">Unread</option>
-						<option value="reading">Reading</option>
-						<option value="completed">Completed</option>
-						<option value="archived">Archived</option>
+						<option value="all">📊 All Status</option>
+						<option value="unread">🆕 Unread</option>
+						<option value="reading">📖 Reading</option>
+						<option value="completed">✅ Completed</option>
+						<option value="archived">📦 Archived</option>
 					</select>
 				</div>
 			</div>
 
 			{#if allTags().length > 0}
-				<div class="flex flex-wrap gap-2 items-center mb-4 p-4 bg-white rounded-lg border border-gray-200">
-					<span class="font-semibold text-gray-600 text-sm">Filter by tags:</span>
+				<div class="flex flex-wrap gap-2 items-center mb-4 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm">
+					<span class="font-semibold text-gray-700 text-sm flex items-center gap-2">
+						<span>🏷️</span>
+						Filter by tags:
+					</span>
 					{#each allTags() as tag}
 						<button
-							class="px-4 py-2 rounded-full text-sm transition-all {selectedTags.includes(tag)
-								? 'bg-blue-500 text-white border-blue-500'
-								: 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'} border"
+							class="px-4 py-2 rounded-full text-sm transition-all font-medium {selectedTags.includes(tag)
+								? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md transform scale-105'
+								: 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 hover:shadow-sm'}"
 							onclick={() => toggleTag(tag)}
 						>
 							{tag}
@@ -197,21 +205,21 @@
 				</div>
 			{/if}
 
-			<div class="text-gray-600 mb-4 text-sm">
-				Showing {filteredBookmarks().length} of {bookmarks.length} bookmarks
+			<div class="text-gray-600 mb-4 text-sm font-medium px-1">
+				Showing <span class="text-blue-600 font-bold">{filteredBookmarks().length}</span> of <span class="font-bold">{bookmarks.length}</span> bookmarks
 			</div>
 
-			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 				{#if filteredBookmarks().length === 0}
-					<div class="col-span-full text-center py-16 px-8 bg-white rounded-lg border-2 border-dashed border-gray-200">
-						<div class="text-6xl mb-4">🔖</div>
-						<h2 class="text-xl font-semibold text-gray-800 mb-2">No bookmarks found</h2>
-						<p class="text-gray-600 mb-6">Start by adding your first bookmark or adjust your filters.</p>
+					<div class="col-span-full text-center py-16 px-8 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 shadow-sm">
+						<div class="text-7xl mb-4 animate-pulse">🔖</div>
+						<h2 class="text-2xl font-bold text-gray-800 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">No bookmarks found</h2>
+						<p class="text-gray-600 mb-6 text-base">Start by adding your first bookmark or adjust your filters.</p>
 						<button
 							onclick={openAddBookmark}
-							class="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-all inline-block"
+							class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all inline-block shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
 						>
-							Add Bookmark
+							+ Add Bookmark
 						</button>
 					</div>
 				{:else}

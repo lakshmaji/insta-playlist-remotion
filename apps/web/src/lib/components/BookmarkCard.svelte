@@ -11,215 +11,71 @@
 
 	let { bookmark, onEdit, onDelete, onStatusChange }: Props = $props();
 
-	const statusColors = {
-		unread: 'bg-gray-200',
-		reading: 'bg-blue-200',
-		completed: 'bg-green-200',
-		archived: 'bg-yellow-200'
+	const statusConfig = {
+		unread: { bg: 'bg-gray-100', text: 'text-gray-700', icon: '🆕' },
+		reading: { bg: 'bg-blue-100', text: 'text-blue-700', icon: '📖' },
+		completed: { bg: 'bg-green-100', text: 'text-green-700', icon: '✅' },
+		archived: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '📦' }
 	};
 </script>
 
-<div class="bookmark-card">
-	<div class="bookmark-thumbnail">
+<div class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300">
+	<div class="relative w-full h-44 overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
 		{#if bookmark.thumbnail}
-			<img src={bookmark.thumbnail} alt={bookmark.title} />
+			<img src={bookmark.thumbnail} alt={bookmark.title} class="w-full h-full object-cover" />
 		{:else}
-			<div class="placeholder-thumbnail">
-				<img src={getFaviconUrl(bookmark.url)} alt="" class="favicon" />
+			<div class="flex items-center justify-center w-full h-full">
+				<img src={getFaviconUrl(bookmark.url)} alt="" class="w-16 h-16 object-contain opacity-80" />
 			</div>
 		{/if}
+		<div class="absolute top-2 right-2">
+			<span class="{statusConfig[bookmark.status].bg} {statusConfig[bookmark.status].text} px-3 py-1 rounded-full text-xs font-semibold shadow-sm backdrop-blur-sm bg-opacity-90">
+				{statusConfig[bookmark.status].icon} {bookmark.status}
+			</span>
+		</div>
 	</div>
 
-	<div class="bookmark-content">
-		<div class="bookmark-header">
-			<a href={bookmark.url} target="_blank" rel="noopener noreferrer" class="bookmark-title">
+	<div class="p-4">
+		<div class="mb-3">
+			<a href={bookmark.url} target="_blank" rel="noopener noreferrer" class="font-bold text-gray-900 text-lg hover:text-blue-600 transition-colors line-clamp-2 block">
 				{bookmark.title}
 			</a>
-			<span class="bookmark-status {statusColors[bookmark.status]}">
-				{bookmark.status}
-			</span>
 		</div>
 
 		{#if bookmark.description}
-			<p class="bookmark-description">{bookmark.description}</p>
+			<p class="text-sm text-gray-600 mb-3 line-clamp-2">
+				{bookmark.description}
+			</p>
 		{/if}
 
 		{#if bookmark.tags.length > 0}
-			<div class="bookmark-tags">
+			<div class="flex flex-wrap gap-2 mb-4">
 				{#each bookmark.tags as tag}
-					<span class="tag">{tag}</span>
+					<span class="bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-200">
+						#{tag}
+					</span>
 				{/each}
 			</div>
 		{/if}
 
-		<div class="bookmark-actions">
+		<div class="flex gap-2 pt-3 border-t border-gray-100">
 			<select
 				value={bookmark.status}
 				onchange={(e) => onStatusChange(bookmark.id, e.currentTarget.value as Bookmark['status'])}
-				class="status-select"
+				class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
 			>
-				<option value="unread">Unread</option>
-				<option value="reading">Reading</option>
-				<option value="completed">Completed</option>
-				<option value="archived">Archived</option>
+				<option value="unread">🆕 Unread</option>
+				<option value="reading">📖 Reading</option>
+				<option value="completed">✅ Completed</option>
+				<option value="archived">📦 Archived</option>
 			</select>
 
-			<button onclick={() => onEdit(bookmark)} class="btn-edit">Edit</button>
-			<button onclick={() => onDelete(bookmark.id)} class="btn-delete">Delete</button>
+			<button onclick={() => onEdit(bookmark)} class="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium text-sm hover:bg-blue-600 transition-all shadow-sm hover:shadow-md">
+				Edit
+			</button>
+			<button onclick={() => onDelete(bookmark.id)} class="px-4 py-2 bg-red-500 text-white rounded-lg font-medium text-sm hover:bg-red-600 transition-all shadow-sm hover:shadow-md">
+				Delete
+			</button>
 		</div>
 	</div>
 </div>
-
-<style>
-	.bookmark-card {
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		overflow: hidden;
-		background: white;
-		transition: box-shadow 0.2s;
-	}
-
-	.bookmark-card:hover {
-		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-	}
-
-	.bookmark-thumbnail {
-		width: 100%;
-		height: 150px;
-		overflow: hidden;
-		background: #f3f4f6;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.bookmark-thumbnail img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.placeholder-thumbnail {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-	}
-
-	.favicon {
-		width: 48px !important;
-		height: 48px !important;
-		object-fit: contain !important;
-	}
-
-	.bookmark-content {
-		padding: 1rem;
-	}
-
-	.bookmark-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: start;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.bookmark-title {
-		font-weight: 600;
-		color: #1f2937;
-		text-decoration: none;
-		flex: 1;
-	}
-
-	.bookmark-title:hover {
-		color: #3b82f6;
-	}
-
-	.bookmark-status {
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		font-size: 0.75rem;
-		text-transform: capitalize;
-		white-space: nowrap;
-	}
-
-	.bg-gray-200 {
-		background-color: #e5e7eb;
-	}
-
-	.bg-blue-200 {
-		background-color: #bfdbfe;
-	}
-
-	.bg-green-200 {
-		background-color: #bbf7d0;
-	}
-
-	.bg-yellow-200 {
-		background-color: #fef08a;
-	}
-
-	.bookmark-description {
-		font-size: 0.875rem;
-		color: #6b7280;
-		margin-bottom: 0.5rem;
-	}
-
-	.bookmark-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.tag {
-		background-color: #dbeafe;
-		color: #1e40af;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		font-size: 0.75rem;
-	}
-
-	.bookmark-actions {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	.status-select {
-		flex: 1;
-		padding: 0.5rem;
-		border: 1px solid #d1d5db;
-		border-radius: 4px;
-		font-size: 0.875rem;
-	}
-
-	.btn-edit,
-	.btn-delete {
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.875rem;
-		transition: background-color 0.2s;
-	}
-
-	.btn-edit {
-		background-color: #3b82f6;
-		color: white;
-	}
-
-	.btn-edit:hover {
-		background-color: #2563eb;
-	}
-
-	.btn-delete {
-		background-color: #ef4444;
-		color: white;
-	}
-
-	.btn-delete:hover {
-		background-color: #dc2626;
-	}
-</style>

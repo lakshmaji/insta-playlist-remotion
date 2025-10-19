@@ -56,64 +56,77 @@
 	});
 </script>
 
-<div class="todo-panel">
-	<div class="todo-header">
-		<h3>📝 To-Do List</h3>
-		<button onclick={() => (showAddForm = !showAddForm)} class="btn-add">
+<div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm p-4 h-full overflow-y-auto">
+	<div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gradient-to-r from-blue-200 to-purple-200">
+		<h3 class="m-0 text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+			<span>📝</span>
+			To-Do List
+		</h3>
+		<button onclick={() => (showAddForm = !showAddForm)} class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white border-none rounded-lg cursor-pointer text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow-md">
 			{showAddForm ? '−' : '+'} Add
 		</button>
 	</div>
 
 	{#if showAddForm}
-		<div class="add-form">
+		<div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg mb-4 border border-blue-200">
 			<input
 				type="text"
 				bind:value={newTodo.title}
 				placeholder="Todo title"
-				class="input-title"
+				class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 			/>
 			<input
 				type="text"
 				bind:value={newTodo.description}
 				placeholder="Description (optional)"
-				class="input-desc"
+				class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 			/>
-			<select bind:value={newTodo.categoryId} class="input-category">
+			<select bind:value={newTodo.categoryId} class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
 				<option value="">No category</option>
 				{#each categories as cat}
 					<option value={cat.id}>{cat.name}</option>
 				{/each}
 			</select>
-			<div class="form-actions">
-				<button onclick={handleAddTodo} class="btn-save">Save</button>
-				<button onclick={() => (showAddForm = false)} class="btn-cancel">Cancel</button>
+			<div class="flex gap-2">
+				<button onclick={handleAddTodo} class="px-4 py-2 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-all">
+					Save
+				</button>
+				<button onclick={() => (showAddForm = false)} class="px-4 py-2 bg-gray-200 text-gray-700 border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-300 transition-all">
+					Cancel
+				</button>
 			</div>
 		</div>
 	{/if}
 
-	<div class="todo-list">
+	<div class="flex flex-col gap-3">
 		{#if todos.length === 0}
-			<p class="empty-state">No todos yet. Create one to get started!</p>
+			<p class="text-center text-gray-400 py-8 text-sm">No todos yet. Create one to get started!</p>
 		{:else}
 			{#each Array.from(todosByCategory()) as [categoryId, categoryTodos]}
 				{@const category = categories.find((c) => c.id === categoryId)}
-				<div class="todo-category">
-					<h4 class="category-title">{category?.name || 'Uncategorized'}</h4>
+				<div class="mb-3">
+					<h4 class="text-xs text-gray-600 m-0 mb-2 uppercase font-semibold tracking-wide">
+						{category?.name || 'Uncategorized'}
+					</h4>
 					{#each categoryTodos as todo}
-						<div class="todo-item" class:completed={todo.completed}>
+						<div class="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 mb-2 transition-all hover:from-gray-100 hover:to-gray-150 {todo.completed ? 'opacity-60' : ''}">
 							<input
 								type="checkbox"
 								checked={todo.completed}
 								onchange={() => toggleTodo(todo.id, todo.completed)}
-								class="todo-checkbox"
+								class="mt-1 cursor-pointer w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
 							/>
-							<div class="todo-content">
-								<div class="todo-title">{todo.title}</div>
+							<div class="flex-1">
+								<div class="font-medium text-gray-900 text-sm {todo.completed ? 'line-through' : ''}">
+									{todo.title}
+								</div>
 								{#if todo.description}
-									<div class="todo-description">{todo.description}</div>
+									<div class="text-xs text-gray-600 mt-1">{todo.description}</div>
 								{/if}
 							</div>
-							<button onclick={() => deleteTodo(todo.id)} class="btn-delete-todo">×</button>
+							<button onclick={() => deleteTodo(todo.id)} class="bg-none border-none text-gray-400 cursor-pointer text-xl p-0 w-6 h-6 flex items-center justify-center leading-none hover:text-red-500 transition-colors">
+								×
+							</button>
 						</div>
 					{/each}
 				</div>
@@ -121,178 +134,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-	.todo-panel {
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		background: white;
-		padding: 1rem;
-		height: 100%;
-		overflow-y: auto;
-	}
-
-	.todo-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-		padding-bottom: 0.5rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	.todo-header h3 {
-		margin: 0;
-		font-size: 1.25rem;
-	}
-
-	.btn-add {
-		padding: 0.5rem 1rem;
-		background-color: #10b981;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.875rem;
-	}
-
-	.btn-add:hover {
-		background-color: #059669;
-	}
-
-	.add-form {
-		background: #f9fafb;
-		padding: 1rem;
-		border-radius: 4px;
-		margin-bottom: 1rem;
-	}
-
-	.input-title,
-	.input-desc,
-	.input-category {
-		width: 100%;
-		padding: 0.5rem;
-		border: 1px solid #d1d5db;
-		border-radius: 4px;
-		margin-bottom: 0.5rem;
-		font-size: 0.875rem;
-	}
-
-	.form-actions {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.btn-save,
-	.btn-cancel {
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.875rem;
-	}
-
-	.btn-save {
-		background-color: #3b82f6;
-		color: white;
-	}
-
-	.btn-save:hover {
-		background-color: #2563eb;
-	}
-
-	.btn-cancel {
-		background-color: #e5e7eb;
-		color: #374151;
-	}
-
-	.btn-cancel:hover {
-		background-color: #d1d5db;
-	}
-
-	.todo-list {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.empty-state {
-		text-align: center;
-		color: #9ca3af;
-		padding: 2rem;
-	}
-
-	.todo-category {
-		margin-bottom: 1rem;
-	}
-
-	.category-title {
-		font-size: 0.875rem;
-		color: #6b7280;
-		margin: 0 0 0.5rem 0;
-		text-transform: uppercase;
-		font-weight: 600;
-	}
-
-	.todo-item {
-		display: flex;
-		align-items: start;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		border-radius: 4px;
-		background: #f9fafb;
-		margin-bottom: 0.5rem;
-		transition: background-color 0.2s;
-	}
-
-	.todo-item:hover {
-		background: #f3f4f6;
-	}
-
-	.todo-item.completed {
-		opacity: 0.6;
-	}
-
-	.todo-item.completed .todo-title {
-		text-decoration: line-through;
-	}
-
-	.todo-checkbox {
-		margin-top: 0.25rem;
-		cursor: pointer;
-	}
-
-	.todo-content {
-		flex: 1;
-	}
-
-	.todo-title {
-		font-weight: 500;
-		color: #1f2937;
-	}
-
-	.todo-description {
-		font-size: 0.875rem;
-		color: #6b7280;
-		margin-top: 0.25rem;
-	}
-
-	.btn-delete-todo {
-		background: none;
-		border: none;
-		color: #9ca3af;
-		cursor: pointer;
-		font-size: 1.5rem;
-		padding: 0;
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		line-height: 1;
-	}
-
-	.btn-delete-todo:hover {
-		color: #ef4444;
-	}
-</style>
