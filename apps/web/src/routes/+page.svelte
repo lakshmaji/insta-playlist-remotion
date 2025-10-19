@@ -12,6 +12,7 @@
 	import TodoPanel from '$lib/components/TodoPanel.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import TagsPanel from '$lib/components/TagsPanel.svelte';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 
 	let selectedCollectionId = $state<string | undefined>(undefined);
 	let selectedKindId = $state<string | undefined>(undefined);
@@ -231,8 +232,8 @@
 </script>
 
 <div class="flex flex-col h-screen">
-	<div class="flex-1 grid lg:grid-cols-[260px_1fr_300px] gap-0 w-full bg-[#111111]">
-		<aside class="h-full lg:sticky lg:top-0 bg-[#1a1a1a] border-r border-gray-800/50">
+	<div class="flex-1 grid lg:grid-cols-[260px_1fr_300px] gap-0 w-full bg-gray-50 dark:bg-[#111111]">
+		<aside class="h-full lg:sticky lg:top-0 bg-white dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-gray-800/50">
 			<Sidebar
 				selectedSection={selectedSection}
 				onSelectSection={(section) => {
@@ -276,7 +277,7 @@
 		<div class="flex flex-col">
 			{#if selectedSection === 'inbox'}
 				<!-- Inbox (Todo) Section -->
-				<header class="bg-neutral-800 text-white p-4 flex justify-between items-center">
+				<header class="bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white p-4 flex justify-between items-center">
 					<h1 class="text-xl font-bold">Inbox</h1>
 					<div class="flex gap-2">
 						<button class="px-4 py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all flex items-center gap-1">
@@ -286,7 +287,7 @@
 					</div>
 				</header>
 				
-				<main class="p-6 bg-neutral-950 text-white">
+				<main class="p-6 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white">
 					{#if todos.length === 0}
 						<div class="text-center py-16 px-8 bg-neutral-800/50 rounded-xl border border-neutral-700 mb-8">
 							<div class="text-5xl mb-4">📝</div>
@@ -313,7 +314,7 @@
 				</main>
 			{:else if selectedSection === 'collections'}
 				<!-- Collections Section -->
-				<header class="bg-neutral-800 text-white p-4 flex justify-between items-center">
+				<header class="bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white p-4 flex justify-between items-center">
 					<div class="flex items-center gap-2">
 						<!-- Back button (if not at root) -->
 						{#if currentCollectionPath.length > 0}
@@ -354,25 +355,25 @@
 					</div>
 				</header>
 				
-				<main class="p-6 bg-neutral-950 text-white">
+				<main class="p-6 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white">
 					{#if collections.length === 0}
 						<div class="flex items-center justify-center min-h-[400px]">
 							<button 
 								onclick={() => openAddCollection(currentParentId)} 
-								class="p-8 bg-neutral-800/50 rounded-xl border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
+								class="p-8 bg-gray-200/50 dark:bg-neutral-800/50 rounded-xl border border-dashed border-gray-300 dark:border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
 							>
 								<div class="text-6xl">📁</div>
-								<span class="text-lg text-neutral-300">Add Collection</span>
+								<span class="text-lg text-gray-700 dark:text-neutral-300">Add Collection</span>
 							</button>
 						</div>
 					{:else if displayedCollections().length === 0}
 						<div class="flex items-center justify-center min-h-[400px]">
 							<button 
 								onclick={() => openAddCollection(currentParentId)} 
-								class="p-8 bg-neutral-800/50 rounded-xl border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
+								class="p-8 bg-gray-200/50 dark:bg-neutral-800/50 rounded-xl border border-dashed border-gray-300 dark:border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
 							>
 								<div class="text-6xl">+</div>
-								<span class="text-lg text-neutral-300">Add Collection</span>
+								<span class="text-lg text-gray-700 dark:text-neutral-300">Add Collection</span>
 							</button>
 						</div>
 					{:else}
@@ -392,7 +393,7 @@
 											navigateToCollection(collection.id);
 										}
 									}}
-									class="p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center group"
+									class="p-6 bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center group"
 								>
 									<div class="text-4xl mb-4">
 										{hasChildren ? '📂' : '📁'}
@@ -429,17 +430,17 @@
 										openAddCollection(currentParentId);
 									}
 								}}
-								class="p-6 bg-neutral-800/50 rounded-lg border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center justify-center"
+								class="p-6 bg-gray-100 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-300 dark:border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center justify-center"
 							>
-								<div class="text-4xl mb-2">+</div>
-								<div class="text-sm text-neutral-400">New Collection</div>
+								<div class="text-4xl mb-2 text-gray-600 dark:text-gray-400">+</div>
+								<div class="text-sm text-gray-600 dark:text-neutral-400">New Collection</div>
 							</div>
 						</div>
 					{/if}
 				</main>
 			{:else}
 				<!-- Bookmarks Section -->
-				<header class="bg-[#1a1a1a] text-gray-300 px-6 py-3 border-b border-gray-800/50 flex justify-between items-center">
+				<header class="bg-gray-100 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 px-6 py-3 border-b border-gray-200 dark:border-gray-800/50 flex justify-between items-center">
 					<div class="flex items-center gap-4">
 						<h1 class="text-lg font-medium">
 							{#if selectedSection === 'all'}
@@ -503,10 +504,13 @@
 							</button>
 						</div>
 						
-						<div class="h-4 w-px bg-gray-700"></div>
+						<div class="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
+						
+						<!-- Theme Toggle -->
+						<ThemeToggle />
 						
 						<!-- Search -->
-						<button class="p-1.5 rounded-md text-gray-400 hover:bg-gray-800/50 hover:text-gray-300 transition-all" title="Search">
+						<button class="p-1.5 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800/50 hover:text-gray-800 dark:hover:text-gray-300 transition-all" title="Search">
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
 							</svg>
@@ -538,7 +542,7 @@
 					</div>
 				</header>
 				
-				<main class="p-6 bg-[#111111]">
+				<main class="p-6 bg-white dark:bg-[#111111]">
 					<!-- Search bar (if needed) -->
 					{#if searchQuery || selectedTags.length > 0}
 					<div class="flex gap-4 mb-6">
@@ -555,7 +559,7 @@
 
 					<!-- Bookmarks grid -->
 					{#if filteredBookmarks().length === 0}
-						<div class="text-center py-16 px-8 bg-gray-800/20 rounded-xl border border-gray-800/50">
+						<div class="text-center py-16 px-8 bg-gray-100 dark:bg-gray-800/20 rounded-xl border border-gray-200 dark:border-gray-800/50">
 							<svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
 								<path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
 							</svg>
@@ -586,7 +590,7 @@
 		</div>
 		
 		<!-- Right Sidebar - Tags Panel -->
-		<aside class="h-full lg:sticky lg:top-0 bg-[#1a1a1a] border-r border-gray-800/50">
+		<aside class="h-full lg:sticky lg:top-0 bg-white dark:bg-[#1a1a1a] border-l border-gray-200 dark:border-gray-800/50">
 			<TagsPanel
 				bookmarks={filteredBookmarks()}
 				allTags={allTags()}
