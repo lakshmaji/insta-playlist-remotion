@@ -1,81 +1,107 @@
 <script lang="ts">
-	import type { Kind } from '$lib/types';
+	import type { Collection, Kind, Tag } from '$lib/types';
 
 	interface Props {
 		selectedSection: string;
 		onSelectSection: (section: string) => void;
 		kinds: Kind[];
+		collections: Collection[];
+		tags: Tag[];
 		selectedKindId?: string;
+		selectedCollectionId?: string;
+		selectedTagId?: string;
 		onSelectKind: (kindId: string | undefined) => void;
+		onSelectCollection: (collectionId: string | undefined) => void;
+		onSelectTag: (tagId: string | undefined) => void;
 		onAddKind: () => void;
 		onAddBookmark: () => void;
 		onAddCollection: () => void;
+		onAddTag: () => void;
 	}
 
 	let { 
 		selectedSection, 
 		onSelectSection, 
-		kinds, 
+		kinds,
+		collections = [],
+		tags = [], 
 		selectedKindId, 
+		selectedCollectionId,
+		selectedTagId,
 		onSelectKind, 
+		onSelectCollection = () => {},
+		onSelectTag = () => {},
 		onAddKind, 
 		onAddBookmark = () => {}, 
-		onAddCollection = () => {} 
+		onAddCollection = () => {},
+		onAddTag = () => {} 
 	}: Props = $props();
+	
+	// Get root collections (no parentId)
+	const rootCollections = $derived(collections.filter(c => !c.parentId));
 </script>
 
-<div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm p-0 h-full overflow-y-auto flex flex-col">
+<div class="bg-neutral-900 p-0 h-full overflow-y-auto flex flex-col text-white">
 	<!-- Top buttons -->
-	<div class="p-3 border-b border-gray-200 flex flex-col gap-2">
+	<div class="p-3 flex flex-col gap-2">
 		<button 
 			onclick={onAddBookmark}
-			class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-700 text-white rounded-lg w-full shadow-sm hover:shadow-md transition-all">
+			class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md w-full hover:bg-neutral-800 transition-all">
 			<span class="text-lg">+</span>
-			<span>New Bookmark</span>
+			<span>New ...</span>
 		</button>
 		<button 
 			onclick={onAddCollection}
-			class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg w-full bg-white hover:bg-gray-50 transition-all">
-			<span class="text-lg">+</span>
-			<span>New Collection</span>
+			class="flex items-center gap-2 px-4 py-2 bg-neutral-800 rounded-md w-full hover:bg-neutral-700 transition-all">
+			<span class="text-lg">📁</span>
+			<span>New ...</span>
 		</button>
+	</div>
+	
+	<!-- Dashboard section -->
+	<div class="p-3 mb-2">
+		<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 hover:bg-neutral-800" 
+			onclick={() => onSelectSection('dashboard')} role="button" tabindex="0">
+			<span class="text-lg">🏠</span>
+			<span>Dashboard</span>
+		</div>
 	</div>
 
 	<!-- Navigation section -->
-	<div class="p-3 border-b border-gray-200">
-		<h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Navigation</h3>
+	<div class="p-3">
+		<h3 class="text-sm font-semibold text-neutral-400 uppercase mb-2">Navigation</h3>
 		<div class="flex flex-col gap-1">
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'inbox' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'inbox' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('inbox')} role="button" tabindex="0">
 				<span class="text-lg">📥</span>
 				<span>Inbox</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'all' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'all' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('all')} role="button" tabindex="0">
-				<span class="text-lg">📚</span>
+				<span class="text-lg">�</span>
 				<span>All Bookmarks</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'favorites' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'favorites' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('favorites')} role="button" tabindex="0">
 				<span class="text-lg">⭐</span>
 				<span>Favorites</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'reading' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'reading' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('reading')} role="button" tabindex="0">
 				<span class="text-lg">📖</span>
 				<span>Reading List</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'collections' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'collections' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('collections')} role="button" tabindex="0">
 				<span class="text-lg">📁</span>
 				<span>Collections</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'tags' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'tags' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('tags')} role="button" tabindex="0">
 				<span class="text-lg">🏷️</span>
 				<span>Tags</span>
 			</div>
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'archive' ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedSection === 'archive' ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectSection('archive')} role="button" tabindex="0">
 				<span class="text-lg">🗃️</span>
 				<span>Archive</span>
@@ -83,28 +109,74 @@
 		</div>
 	</div>
 
-	<!-- Kind section -->
+	<!-- Collections section -->
 	<div class="p-3">
 		<div class="flex justify-between items-center mb-2">
-			<h3 class="text-sm font-semibold text-gray-500 uppercase">Kind</h3>
-			<button onclick={onAddKind} class="text-gray-500 hover:text-gray-700 transition-all">
-				+
+			<h3 class="text-sm font-semibold text-neutral-400 uppercase">Collections</h3>
+			<button onclick={onAddCollection} class="text-neutral-400 hover:text-white transition-all">
+				<span class="text-lg">+</span>
 			</button>
 		</div>
 		<div class="flex flex-col gap-1">
-			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {!selectedKindId ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+			{#each rootCollections as collection}
+				<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedCollectionId === collection.id ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
+					onclick={() => onSelectCollection(collection.id)} role="button" tabindex="0">
+					<span class="text-lg">📁</span>
+					<span>{collection.name}</span>
+				</div>
+			{/each}
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 hover:bg-neutral-800 text-neutral-400" 
+				onclick={onAddCollection} role="button" tabindex="0">
+				<span>+ New page</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Kind section -->
+	<div class="p-3">
+		<div class="flex justify-between items-center mb-2">
+			<h3 class="text-sm font-semibold text-neutral-400 uppercase">Kind</h3>
+			<button onclick={onAddKind} class="text-neutral-400 hover:text-white transition-all">
+				<span class="text-lg">+</span>
+			</button>
+		</div>
+		<div class="flex flex-col gap-1">
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {!selectedKindId ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 				onclick={() => onSelectKind(undefined)} role="button" tabindex="0">
-				<span class="text-lg">�</span>
-				<span>All Types</span>
+				<span class="text-lg">📋</span>
+				<span>Articles</span>
 			</div>
 			
 			{#each kinds as kind}
-				<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedKindId === kind.id ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'}" 
+				<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedKindId === kind.id ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
 					onclick={() => onSelectKind(kind.id)} role="button" tabindex="0">
-					<span class="text-lg">{kind.icon || '�'}</span>
+					<span class="text-lg">{kind.icon || '📁'}</span>
 					<span>{kind.name}</span>
 				</div>
 			{/each}
+		</div>
+	</div>
+	
+	<!-- Tags section -->
+	<div class="p-3">
+		<div class="flex justify-between items-center mb-2">
+			<h3 class="text-sm font-semibold text-neutral-400 uppercase">Tags</h3>
+			<button onclick={onAddTag} class="text-neutral-400 hover:text-white transition-all">
+				<span class="text-lg">+</span>
+			</button>
+		</div>
+		<div class="flex flex-col gap-1">
+			{#each tags as tag}
+				<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 {selectedTagId === tag.id ? 'bg-neutral-800 font-semibold' : 'hover:bg-neutral-800'}" 
+					onclick={() => onSelectTag(tag.id)} role="button" tabindex="0">
+					<span class="text-lg" style="color: {tag.color || 'currentColor'}">🏷️</span>
+					<span>{tag.name}</span>
+				</div>
+			{/each}
+			<div class="py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center gap-2 hover:bg-neutral-800 text-neutral-400" 
+				onclick={onAddTag} role="button" tabindex="0">
+				<span>+ New page</span>
+			</div>
 		</div>
 	</div>
 </div>
@@ -120,11 +192,11 @@
 	}
 
 	div::-webkit-scrollbar-thumb {
-		background-color: rgba(0, 0, 0, 0.1);
+		background-color: rgba(255, 255, 255, 0.1);
 		border-radius: 20px;
 	}
 
 	div::-webkit-scrollbar-thumb:hover {
-		background-color: rgba(0, 0, 0, 0.2);
+		background-color: rgba(255, 255, 255, 0.2);
 	}
 </style>

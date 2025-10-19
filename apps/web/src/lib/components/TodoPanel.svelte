@@ -56,42 +56,42 @@
 	});
 </script>
 
-<div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm p-4 h-full overflow-y-auto">
-	<div class="flex justify-between items-center mb-4 pb-3 border-b-2 border-gradient-to-r from-blue-200 to-purple-200">
-		<h3 class="m-0 text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+<div class="bg-neutral-800 rounded-md p-4 h-full overflow-y-auto">
+	<div class="flex justify-between items-center mb-4 pb-3 border-b border-neutral-700">
+		<h3 class="m-0 text-xl font-bold text-white flex items-center gap-2">
 			<span>📝</span>
 			To-Do List
 		</h3>
-		<button onclick={() => (showAddForm = !showAddForm)} class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white border-none rounded-lg cursor-pointer text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow-md">
+		<button onclick={() => (showAddForm = !showAddForm)} class="px-4 py-2 bg-blue-600 text-white border-none rounded-md cursor-pointer text-sm font-semibold hover:bg-blue-700 transition-all">
 			{showAddForm ? '−' : '+'} Add
 		</button>
 	</div>
 
 	{#if showAddForm}
-		<div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg mb-4 border border-blue-200">
+		<div class="bg-neutral-900 p-4 rounded-md mb-4 border border-neutral-700">
 			<input
 				type="text"
 				bind:value={newTodo.title}
 				placeholder="Todo title"
-				class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="w-full px-3 py-2 border border-neutral-700 rounded-md mb-2 text-sm bg-neutral-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
 			/>
 			<input
 				type="text"
 				bind:value={newTodo.description}
 				placeholder="Description (optional)"
-				class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="w-full px-3 py-2 border border-neutral-700 rounded-md mb-2 text-sm bg-neutral-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
 			/>
-			<select bind:value={newTodo.collectionId} class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+			<select bind:value={newTodo.collectionId} class="w-full px-3 py-2 border border-neutral-700 rounded-md mb-3 text-sm bg-neutral-800 text-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
 				<option value="">No collection</option>
 				{#each collections as col}
 					<option value={col.id}>{col.name}</option>
 				{/each}
 			</select>
 			<div class="flex gap-2">
-				<button onclick={handleAddTodo} class="px-4 py-2 bg-blue-500 text-white border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-blue-600 transition-all">
+				<button onclick={handleAddTodo} class="px-4 py-2 bg-blue-600 text-white border-none rounded-md cursor-pointer text-sm font-medium hover:bg-blue-700 transition-all">
 					Save
 				</button>
-				<button onclick={() => (showAddForm = false)} class="px-4 py-2 bg-gray-200 text-gray-700 border-none rounded-lg cursor-pointer text-sm font-medium hover:bg-gray-300 transition-all">
+				<button onclick={() => (showAddForm = false)} class="px-4 py-2 bg-neutral-700 text-white border-none rounded-md cursor-pointer text-sm font-medium hover:bg-neutral-600 transition-all">
 					Cancel
 				</button>
 			</div>
@@ -100,31 +100,31 @@
 
 	<div class="flex flex-col gap-3">
 		{#if todos.length === 0}
-			<p class="text-center text-gray-400 py-8 text-sm">No todos yet. Create one to get started!</p>
+			<p class="text-center text-neutral-500 py-8 text-sm">No todos yet. Create one to get started!</p>
 		{:else}
 			{#each Array.from(todosByCollection()) as [collectionId, collectionTodos]}
 				{@const collection = collections.find((c) => c.id === collectionId)}
 				<div class="mb-3">
-					<h4 class="text-xs text-gray-600 m-0 mb-2 uppercase font-semibold tracking-wide">
+					<h4 class="text-xs text-neutral-400 m-0 mb-2 uppercase font-semibold tracking-wide">
 						{collection?.name || 'Uncategorized'}
 					</h4>
 					{#each collectionTodos as todo}
-						<div class="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 mb-2 transition-all hover:from-gray-100 hover:to-gray-150 {todo.completed ? 'opacity-60' : ''}">
+						<div class="flex items-start gap-3 p-3 rounded-md bg-neutral-900/50 mb-2 transition-all hover:bg-neutral-900 {todo.completed ? 'opacity-60' : ''}">
 							<input
 								type="checkbox"
 								checked={todo.completed}
 								onchange={() => toggleTodo(todo.id, todo.completed)}
-								class="mt-1 cursor-pointer w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+								class="mt-1 cursor-pointer w-4 h-4 text-blue-600 rounded focus:ring-1 focus:ring-blue-500"
 							/>
 							<div class="flex-1">
-								<div class="font-medium text-gray-900 text-sm {todo.completed ? 'line-through' : ''}">
+								<div class="font-medium text-white text-sm {todo.completed ? 'line-through text-neutral-400' : ''}">
 									{todo.title}
 								</div>
 								{#if todo.description}
-									<div class="text-xs text-gray-600 mt-1">{todo.description}</div>
+									<div class="text-xs text-neutral-400 mt-1">{todo.description}</div>
 								{/if}
 							</div>
-							<button onclick={() => deleteTodo(todo.id)} class="bg-none border-none text-gray-400 cursor-pointer text-xl p-0 w-6 h-6 flex items-center justify-center leading-none hover:text-red-500 transition-colors">
+							<button onclick={() => deleteTodo(todo.id)} class="bg-none border-none text-neutral-500 cursor-pointer text-xl p-0 w-6 h-6 flex items-center justify-center leading-none hover:text-red-500 transition-colors">
 								×
 							</button>
 						</div>
