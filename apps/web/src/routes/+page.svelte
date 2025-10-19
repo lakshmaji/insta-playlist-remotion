@@ -21,6 +21,7 @@
 	let statusFilter = $state<Bookmark['status'] | 'all'>('all');
 	let selectedSection = $state<string>('all');
 	let viewMode = $state<'gallery' | 'list'>('gallery');
+	let currentCollectionPath = $state<string[]>([]); // Array of collection IDs representing the current path
 
 	let showBookmarkModal = $state(false);
 	let showCollectionModal = $state(false);
@@ -38,6 +39,26 @@
 	const kinds = $derived(bookmarkStore.kinds);
 	const tags = $derived(bookmarkStore.tags);
 	const todos = $derived(bookmarkStore.todos);
+
+	// Current parent collection (last in path, or undefined for root)
+	const currentParentId = $derived(currentCollectionPath[currentCollectionPath.length - 1]);
+	
+	// Collections to display at current level
+	const displayedCollections = $derived(() => {
+		return collections.filter(c => c.parentId === currentParentId);
+	});
+
+	// Breadcrumb path for navigation
+	const breadcrumbPath = $derived(() => {
+		const path = [{ id: undefined, name: 'Collections' }]; // Root level
+		for (const collectionId of currentCollectionPath) {
+			const collection = collections.find(c => c.id === collectionId);
+			if (collection) {
+				path.push({ id: collectionId, name: collection.name });
+			}
+		}
+		return path;
+	});
 
 	const filteredBookmarks = $derived(() => {
 		let filtered = bookmarks;
@@ -172,6 +193,30 @@
 		}
 	}
 
+	// Collection navigation functions
+	function navigateToCollection(collectionId: string) {
+		currentCollectionPath = [...currentCollectionPath, collectionId];
+	}
+
+	function navigateToBreadcrumb(targetId: string | undefined) {
+		if (targetId === undefined) {
+			// Navigate to root
+			currentCollectionPath = [];
+		} else {
+			// Navigate to specific collection in path
+			const index = currentCollectionPath.indexOf(targetId);
+			if (index >= 0) {
+				currentCollectionPath = currentCollectionPath.slice(0, index + 1);
+			}
+		}
+	}
+
+	function goBackToParent() {
+		if (currentCollectionPath.length > 0) {
+			currentCollectionPath = currentCollectionPath.slice(0, -1);
+		}
+	}
+
 	function updateBookmarkStatus(id: string, status: Bookmark['status']) {
 		bookmarkStore.updateBookmark(id, { status });
 	}
@@ -269,9 +314,41 @@
 			{:else if selectedSection === 'collections'}
 				<!-- Collections Section -->
 				<header class="bg-neutral-800 text-white p-4 flex justify-between items-center">
-					<h1 class="text-xl font-bold">Collections</h1>
+					<div class="flex items-center gap-2">
+						<!-- Back button (if not at root) -->
+						{#if currentCollectionPath.length > 0}
+							<button 
+								onclick={goBackToParent}
+								class="p-2 hover:bg-neutral-700 rounded-md transition-all"
+								title="Go back"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+								</svg>
+							</button>
+						{/if}
+						
+						<!-- Breadcrumb Navigation -->
+						<div class="flex items-center gap-1">
+							{#each breadcrumbPath as crumb, index}
+								<button 
+									onclick={() => navigateToBreadcrumb(crumb.id)}
+									class="text-xl font-bold hover:text-blue-400 transition-all {index === breadcrumbPath.length - 1 ? 'text-white' : 'text-neutral-400'}"
+								>
+									{crumb.name}
+								</button>
+								{#if index < breadcrumbPath.length - 1}
+									<span class="text-neutral-500 text-lg">/</span>
+								{/if}
+							{/each}
+						</div>
+					</div>
+					
 					<div class="flex gap-2">
-						<button onclick={openAddCollection} class="px-4 py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all flex items-center gap-1">
+						<button 
+							onclick={() => openAddCollection(currentParentId)} 
+							class="px-4 py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all flex items-center gap-1"
+						>
 							<span>New Collection</span>
 						</button>
 					</div>
@@ -279,25 +356,81 @@
 				
 				<main class="p-6 bg-neutral-950 text-white">
 					{#if collections.length === 0}
-						<div class="text-center py-16 px-8 bg-neutral-800/50 rounded-xl border border-neutral-700 mb-8">
-							<div class="text-5xl mb-4">📁</div>
-							<h2 class="text-2xl font-bold mb-3">No collections yet. Create one to get started!</h2>
-							<button onclick={openAddCollection} class="px-4 py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all mt-4">
-								+ Create collection
+						<div class="flex items-center justify-center min-h-[400px]">
+							<button 
+								onclick={() => openAddCollection(currentParentId)} 
+								class="p-8 bg-neutral-800/50 rounded-xl border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
+							>
+								<div class="text-6xl">📁</div>
+								<span class="text-lg text-neutral-300">Add Collection</span>
+							</button>
+						</div>
+					{:else if displayedCollections().length === 0}
+						<div class="flex items-center justify-center min-h-[400px]">
+							<button 
+								onclick={() => openAddCollection(currentParentId)} 
+								class="p-8 bg-neutral-800/50 rounded-xl border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all flex flex-col items-center gap-3"
+							>
+								<div class="text-6xl">+</div>
+								<span class="text-lg text-neutral-300">Add Collection</span>
 							</button>
 						</div>
 					{:else}
 						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-							{#each collections as collection}
-								<div class="p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-blue-500 transition-all cursor-pointer flex flex-col items-center">
-									<div class="text-4xl mb-4">📁</div>
-									<div class="text-lg font-medium text-center">{collection.name}</div>
-									<div class="mt-2 text-xs text-neutral-400">
-										{filteredBookmarks().filter(b => b.collectionId === collection.id).length} bookmarks
+							{#each displayedCollections() as collection}
+								{@const childCollections = collections.filter(c => c.parentId === collection.id)}
+								{@const bookmarkCount = bookmarks.filter(b => b.collectionId === collection.id).length}
+								{@const hasChildren = childCollections.length > 0}
+								
+								<div 
+									role="button"
+									tabindex="0"
+									onclick={() => navigateToCollection(collection.id)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											navigateToCollection(collection.id);
+										}
+									}}
+									class="p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center group"
+								>
+									<div class="text-4xl mb-4">
+										{hasChildren ? '📂' : '📁'}
 									</div>
+									<div class="text-lg font-medium text-center mb-2">{collection.name}</div>
+									<div class="text-xs text-neutral-400 text-center">
+										{#if hasChildren}
+											{childCollections.length} collection{childCollections.length === 1 ? '' : 's'}
+											{#if bookmarkCount > 0}
+												• {bookmarkCount} bookmark{bookmarkCount === 1 ? '' : 's'}
+											{/if}
+										{:else}
+											{bookmarkCount} bookmark{bookmarkCount === 1 ? '' : 's'}
+										{/if}
+									</div>
+									
+									<!-- Hover indicator for navigation -->
+									{#if hasChildren}
+										<div class="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+											<svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+											</svg>
+										</div>
+									{/if}
 								</div>
 							{/each}
-							<div onclick={openAddCollection} class="p-6 bg-neutral-800/50 rounded-lg border border-dashed border-neutral-600 hover:border-blue-500 transition-all cursor-pointer flex flex-col items-center justify-center">
+							<div 
+								role="button"
+								tabindex="0"
+								onclick={() => openAddCollection(currentParentId)} 
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										openAddCollection(currentParentId);
+									}
+								}}
+								class="p-6 bg-neutral-800/50 rounded-lg border border-dashed border-neutral-600 hover:border-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer flex flex-col items-center justify-center"
+							>
 								<div class="text-4xl mb-2">+</div>
 								<div class="text-sm text-neutral-400">New Collection</div>
 							</div>
